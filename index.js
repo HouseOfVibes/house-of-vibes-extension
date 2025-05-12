@@ -1,5 +1,5 @@
-// House of Vibes Extension - Theme Switcher
-// Version 1.0 - Working theme system
+// House of Vibes Extension - Theme Switcher with Draggable Button
+// Version 1.1 - Working theme system with movable button
 
 (function() {
   // Theme Configuration
@@ -21,6 +21,12 @@
       primary: "#00b894",
       secondary: "#6c5ce7",
       background: "linear-gradient(135deg, #00b894 0%, #6c5ce7 100%)"
+    },
+    tropical: {
+      name: "🏝️ Tropical",
+      primary: "#17a2b8",
+      secondary: "#6f42c1",
+      background: "linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)"
     }
   };
 
@@ -38,6 +44,12 @@
     // Apply to body immediately
     document.body.style.background = theme.background;
     
+    // Update button color
+    const button = document.querySelector('.hov-theme-button');
+    if (button) {
+      button.style.background = theme.primary;
+    }
+    
     currentTheme = themeName;
     console.log(`Applied theme: ${theme.name}`);
   }
@@ -45,16 +57,16 @@
   // Create theme switcher dropdown
   function createThemeSwitcher() {
     const container = document.createElement('div');
+    container.className = 'hov-theme-container';
     container.style.cssText = `
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  cursor: move;
-`;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
     `;
     
     const button = document.createElement('button');
+    button.className = 'hov-theme-button';
     button.innerHTML = '🎨 Themes';
     button.style.cssText = `
       background: var(--theme-primary, #4ec5d4);
@@ -64,10 +76,13 @@
       border-radius: 25px;
       cursor: pointer;
       font-size: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      user-select: none;
+      transition: all 0.3s ease;
     `;
     
     const dropdown = document.createElement('div');
+    dropdown.className = 'hov-theme-dropdown';
     dropdown.style.cssText = `
       position: absolute;
       top: 100%;
@@ -76,19 +91,22 @@
       border-radius: 10px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       display: none;
-      min-width: 150px;
+      min-width: 180px;
       margin-top: 5px;
+      overflow: hidden;
     `;
     
     // Add theme options
     Object.keys(themes).forEach(themeName => {
       const option = document.createElement('div');
       option.innerHTML = themes[themeName].name;
+      option.className = 'hov-theme-option';
       option.style.cssText = `
-        padding: 10px 15px;
+        padding: 12px 15px;
         cursor: pointer;
         color: #333;
-        border-radius: 5px;
+        font-size: 14px;
+        transition: background 0.2s ease;
       `;
       
       option.addEventListener('mouseenter', () => {
@@ -99,7 +117,8 @@
         option.style.background = 'transparent';
       });
       
-      option.addEventListener('click', () => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
         applyTheme(themeName);
         dropdown.style.display = 'none';
       });
@@ -107,9 +126,64 @@
       dropdown.appendChild(option);
     });
     
+    // Dragging variables
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let containerStartX = 0;
+    let containerStartY = 0;
+    
+    // Make container draggable
+    button.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      isDragging = true;
+      
+      // Store where the mouse was clicked relative to the button
+      const rect = container.getBoundingClientRect();
+      dragStartX = e.clientX - rect.left;
+      dragStartY = e.clientY - rect.top;
+      
+      container.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      e.preventDefault();
+      
+      // Calculate new position
+      const newX = e.clientX - dragStartX;
+      const newY = e.clientY - dragStartY;
+      
+      // Keep button on screen
+      const maxX = window.innerWidth - container.offsetWidth;
+      const maxY = window.innerHeight - container.offsetHeight;
+      
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      // Update position
+      container.style.left = constrainedX + 'px';
+      container.style.top = constrainedY + 'px';
+      container.style.right = 'auto';
+      container.style.bottom = 'auto';
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        container.style.cursor = 'pointer';
+        document.body.style.userSelect = '';
+      }
+    });
+    
     // Toggle dropdown
-    button.addEventListener('click', () => {
-      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    button.addEventListener('click', (e) => {
+      if (!isDragging) {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
     });
     
     // Close dropdown when clicking outside
@@ -122,37 +196,6 @@
     container.appendChild(button);
     container.appendChild(dropdown);
     document.body.appendChild(container);
-    // Make button draggable
-let isDragging = false;
-let currentX = 0;
-let currentY = 0;
-let initialX = 0;
-let initialY = 0;
-
-container.addEventListener('mousedown', (e) => {
-  if (e.target === button && !e.target.closest('div[style*="background: white"]')) {
-    isDragging = true;
-    initialX = e.clientX - currentX;
-    initialY = e.clientY - currentY;
-    container.style.cursor = 'grabbing';
-  }
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (isDragging) {
-    e.preventDefault();
-    currentX = e.clientX - initialX;
-    currentY = e.clientY - initialY;
-    container.style.transform = `translate(${currentX}px, ${currentY}px)`;
-  }
-});
-
-document.addEventListener('mouseup', () => {
-  if (isDragging) {
-    isDragging = false;
-    container.style.cursor = 'move';
-  }
-});
     
     return container;
   }
