@@ -1,5 +1,5 @@
 // House of Vibes Extension - Theme Switcher
-// Version 1.0 - Basic theme system
+// Version 1.0 - Working theme system
 
 (function() {
   // Theme Configuration
@@ -15,18 +15,46 @@
       primary: "#4ec5d4",
       secondary: "#72c6ef",
       background: "linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%)"
+    },
+    spring: {
+      name: "🌿 Spring Fresh",
+      primary: "#00b894",
+      secondary: "#6c5ce7",
+      background: "linear-gradient(135deg, #00b894 0%, #6c5ce7 100%)"
     }
   };
 
-  // Create theme switcher button
+  let currentTheme = 'ocean';
+
+  // Apply theme
+  function applyTheme(themeName) {
+    const theme = themes[themeName];
+    if (!theme) return;
+    
+    document.documentElement.style.setProperty('--theme-primary', theme.primary);
+    document.documentElement.style.setProperty('--theme-secondary', theme.secondary);
+    document.documentElement.style.setProperty('--theme-background', theme.background);
+    
+    // Apply to body immediately
+    document.body.style.background = theme.background;
+    
+    currentTheme = themeName;
+    console.log(`Applied theme: ${theme.name}`);
+  }
+
+  // Create theme switcher dropdown
   function createThemeSwitcher() {
-    const button = document.createElement('button');
-    button.innerHTML = '🎨 Themes';
-    button.style.cssText = `
+    const container = document.createElement('div');
+    container.style.cssText = `
       position: fixed;
       top: 20px;
       right: 20px;
       z-index: 9999;
+    `;
+    
+    const button = document.createElement('button');
+    button.innerHTML = '🎨 Themes';
+    button.style.cssText = `
       background: var(--theme-primary, #4ec5d4);
       color: white;
       border: none;
@@ -37,14 +65,70 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     `;
     
-    document.body.appendChild(button);
-    return button;
+    const dropdown = document.createElement('div');
+    dropdown.style.cssText = `
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: none;
+      min-width: 150px;
+      margin-top: 5px;
+    `;
+    
+    // Add theme options
+    Object.keys(themes).forEach(themeName => {
+      const option = document.createElement('div');
+      option.innerHTML = themes[themeName].name;
+      option.style.cssText = `
+        padding: 10px 15px;
+        cursor: pointer;
+        color: #333;
+        border-radius: 5px;
+      `;
+      
+      option.addEventListener('mouseenter', () => {
+        option.style.background = '#f0f0f0';
+      });
+      
+      option.addEventListener('mouseleave', () => {
+        option.style.background = 'transparent';
+      });
+      
+      option.addEventListener('click', () => {
+        applyTheme(themeName);
+        dropdown.style.display = 'none';
+      });
+      
+      dropdown.appendChild(option);
+    });
+    
+    // Toggle dropdown
+    button.addEventListener('click', () => {
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+    
+    container.appendChild(button);
+    container.appendChild(dropdown);
+    document.body.appendChild(container);
+    
+    return container;
   }
 
   // Initialize extension
   function init() {
     console.log('House of Vibes Extension loaded! 🎉');
     createThemeSwitcher();
+    applyTheme('ocean'); // Start with ocean theme
   }
 
   // Wait for page to load
