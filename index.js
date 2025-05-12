@@ -46,10 +46,12 @@
   function createThemeSwitcher() {
     const container = document.createElement('div');
     container.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9999;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  cursor: move;
+`;
     `;
     
     const button = document.createElement('button');
