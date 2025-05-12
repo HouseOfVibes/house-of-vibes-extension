@@ -3,32 +3,68 @@
 
 (function() {
   // Theme Configuration
-  const themes = {
-    sunset: {
-      name: "🌅 Sunset Vibes",
-      primary: "#ff6b35",
-      secondary: "#f54888",
-      background: "linear-gradient(135deg, #ff6b35 0%, #f54888 100%)"
-    },
-    ocean: {
-      name: "🌊 Ocean Breeze", 
-      primary: "#4ec5d4",
-      secondary: "#72c6ef",
-      background: "linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%)"
-    },
-    spring: {
-      name: "🌿 Spring Fresh",
-      primary: "#00b894",
-      secondary: "#6c5ce7",
-      background: "linear-gradient(135deg, #00b894 0%, #6c5ce7 100%)"
-    },
-    tropical: {
-      name: "🏝️ Tropical",
-      primary: "#17a2b8",
-      secondary: "#6f42c1",
-      background: "linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)"
-    }
-  };
+ const themes = {
+  sunset: {
+    name: "🌅 Sunset Vibes",
+    primary: "#ff6b35",
+    secondary: "#f54888",
+    background: "linear-gradient(135deg, #ff6b35 0%, #f54888 100%)"
+  },
+  ocean: {
+    name: "🌊 Ocean Breeze", 
+    primary: "#4ec5d4",
+    secondary: "#72c6ef",
+    background: "linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%)"
+  },
+  spring: {
+    name: "🌿 Spring Fresh",
+    primary: "#00b894",
+    secondary: "#6c5ce7",
+    background: "linear-gradient(135deg, #00b894 0%, #6c5ce7 100%)"
+  },
+  tropical: {
+    name: "🏝️ Tropical",
+    primary: "#17a2b8",
+    secondary: "#6f42c1",
+    background: "linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)"
+  },
+  energy: {
+    name: "🔥 Energy Burst",
+    primary: "#e74c3c",
+    secondary: "#f39c12",
+    background: "linear-gradient(135deg, #e74c3c 0%, #f39c12 100%)"
+  },
+  focus: {
+    name: "⚡ Focus Mode",
+    primary: "#3498db",
+    secondary: "#5dade2",
+    background: "linear-gradient(135deg, #3498db 0%, #5dade2 100%)"
+  },
+  calm: {
+    name: "🧘 Calm Focus",
+    primary: "#8e44ad",
+    secondary: "#d7bde2",
+    background: "linear-gradient(135deg, #8e44ad 0%, #d7bde2 100%)"
+  },
+  professional: {
+    name: "💼 Professional",
+    primary: "#1e3a8a",
+    secondary: "#fbbf24",
+    background: "linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #fbbf24 100%)"
+  },
+  creative: {
+    name: "🎨 Creative Flow",
+    primary: "#ec4899",
+    secondary: "#3b82f6",
+    background: "linear-gradient(45deg, #ec4899 0%, #8b5cf6 25%, #3b82f6 50%, #10b981 75%, #f59e0b 100%)"
+  },
+  action: {
+    name: "🎯 Action Time",
+    primary: "#059669",
+    secondary: "#047857",
+    background: "linear-gradient(135deg, #059669 0%, #0891b2 100%)"
+  }
+};
 
   let currentTheme = 'ocean';
 
