@@ -122,6 +122,37 @@
     container.appendChild(button);
     container.appendChild(dropdown);
     document.body.appendChild(container);
+    // Make button draggable
+let isDragging = false;
+let currentX = 0;
+let currentY = 0;
+let initialX = 0;
+let initialY = 0;
+
+container.addEventListener('mousedown', (e) => {
+  if (e.target === button && !e.target.closest('div[style*="background: white"]')) {
+    isDragging = true;
+    initialX = e.clientX - currentX;
+    initialY = e.clientY - currentY;
+    container.style.cursor = 'grabbing';
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    e.preventDefault();
+    currentX = e.clientX - initialX;
+    currentY = e.clientY - initialY;
+    container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    container.style.cursor = 'move';
+  }
+});
     
     return container;
   }
