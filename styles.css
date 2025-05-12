@@ -24,3 +24,27 @@ body {
 * {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+/* Make text readable on colored backgrounds */
+body, 
+body *:not(button):not(input):not(textarea) {
+  color: white !important;
+}
+
+/* Specific elements that need white text */
+[data-element-id="conversation-list"] *,
+[data-element-id="message-content"] *,
+.message *,
+.chat-message * {
+  color: white !important;
+}
+
+/* Make sure buttons keep their own colors */
+button {
+  color: white;
+}
+
+/* Input fields should have dark text for readability */
+input, textarea {
+  color: #333 !important;
+  background: rgba(255,255,255,0.9) !important;
+}
