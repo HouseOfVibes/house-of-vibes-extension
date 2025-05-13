@@ -1,10 +1,12 @@
-/* House of Vibes Extension - Theme Styles */
+/* House of Vibes Extension - Enhanced Styles */
+
 /* Custom header */
 [data-element-id="header-container"]::before {
-  content: "House of Vibes";
+  content: "🏠 House of Vibes";
   font-weight: bold;
-  color: var(--theme-primary, #4ec5d4);
+  color: white;
   margin-right: 15px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 /* Theme variables */
@@ -20,31 +22,82 @@ body {
   transition: background 0.3s ease;
 }
 
-/* Smooth transitions */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-/* Make text readable on colored backgrounds */
-body, 
-body *:not(button):not(input):not(textarea) {
-  color: white !important;
-}
-
-/* Specific elements that need white text */
+/* Make ALL text white and readable */
+body,
+body *,
 [data-element-id="conversation-list"] *,
 [data-element-id="message-content"] *,
 .message *,
-.chat-message * {
+.chat-message *,
+.sidebar *,
+.folder *,
+.chat-item *,
+h1, h2, h3, h4, h5, h6,
+p, span, div {
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Style the sidebar to match theme */
+[data-element-id="side-bar"],
+.sidebar {
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%) !important;
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+/* Sidebar items */
+.folder, 
+.chat-item,
+[data-element-id="conversation-list"] .chat-item {
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  margin: 4px 0 !important;
+  transition: all 0.3s ease;
+}
+
+.folder:hover,
+.chat-item:hover {
+  background: rgba(255,255,255,0.2) !important;
+  transform: translateX(5px);
+}
+
+/* Input fields - keep dark for readability */
+input, 
+textarea,
+.input-field {
+  background: rgba(255,255,255,0.9) !important;
+  color: #333 !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  border-radius: 8px !important;
+}
+
+/* Buttons */
+button:not(.hov-theme-button) {
+  background: rgba(255,255,255,0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease;
+}
+
+button:not(.hov-theme-button):hover {
+  background: rgba(255,255,255,0.3) !important;
+  transform: translateY(-2px);
+}
+
+/* Make sure theme button stays styled */
+.hov-theme-button {
   color: white !important;
 }
 
-/* Make sure buttons keep their own colors */
-button {
-  color: white;
+/* Smooth transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
-/* Input fields should have dark text for readability */
-input, textarea {
-  color: #333 !important;
-  background: rgba(255,255,255,0.9) !important;
+/* Fix any remaining dark text */
+.text-dark,
+.dark-text {
+  color: white !important;
 }
