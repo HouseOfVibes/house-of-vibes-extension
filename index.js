@@ -1,5 +1,5 @@
 // House of Vibes Extension - Complete Theme System
-// Version 2.0 - Includes CSS injection for styling
+// Version 2.1 - Fixed sidebar and dropdown styling
 
 (function() {
   // Theme Configuration - All 10 themes
@@ -72,7 +72,7 @@
   function injectStyles() {
     const styleEl = document.createElement('style');
     styleEl.textContent = `
-      /* House of Vibes Extension - Injected Styles */
+      /* House of Vibes Extension - Enhanced Styles */
       
       /* Theme variables */
       :root {
@@ -87,7 +87,7 @@
         transition: background 0.3s ease;
       }
       
-      /* FORCE sidebar styling - multiple selectors for compatibility */
+      /* Sidebar styling - blend with theme colors */
       aside,
       nav,
       .sidebar,
@@ -98,13 +98,35 @@
       .fixed.left-0,
       .fixed.top-0.left-0,
       [data-element-id="side-bar"] {
-        background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%) !important;
-        backdrop-filter: blur(10px) !important;
-        border-right: 1px solid rgba(255,255,255,0.2) !important;
+        background: 
+          linear-gradient(135deg, 
+            var(--theme-primary, #4ec5d4) 0%, 
+            rgba(255,255,255,0.1) 30%, 
+            rgba(255,255,255,0.05) 100%
+          ) !important;
+        backdrop-filter: blur(15px) !important;
+        border-right: 1px solid rgba(255,255,255,0.3) !important;
+        position: relative;
       }
       
-      /* FORCE all text to be white */
-      body *:not(input):not(textarea),
+      /* Add subtle gradient overlay to sidebar */
+      aside::before,
+      nav::before,
+      .sidebar::before,
+      [class*="w-64"]::before,
+      [class*="w-60"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+        pointer-events: none;
+      }
+      
+      /* ALL text white */
+      body *:not(input):not(textarea):not(.hov-theme-option),
       aside *,
       nav *,
       .sidebar *,
@@ -115,10 +137,10 @@
       .fixed.left-0 *,
       [data-element-id="side-bar"] * {
         color: white !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.4) !important;
       }
       
-      /* Sidebar buttons and items */
+      /* Sidebar buttons with better styling */
       aside button,
       nav button,
       nav .flex,
@@ -129,10 +151,11 @@
       [class*="sidebar"] button,
       [class*="w-64"] button,
       [class*="w-60"] button {
-        background: rgba(255,255,255,0.1) !important;
-        border-radius: 8px !important;
+        background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%) !important;
+        border-radius: 12px !important;
         transition: all 0.3s ease !important;
         color: white !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
       }
       
       /* Sidebar hover effects */
@@ -140,25 +163,34 @@
       nav button:hover,
       .sidebar button:hover,
       [class*="sidebar"] button:hover {
-        background: rgba(255,255,255,0.3) !important;
-        transform: translateX(5px) !important;
+        background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%) !important;
+        transform: translateX(8px) scale(1.02) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
       }
       
-      /* Input fields - keep dark for readability */
+      /* Input fields */
       input, 
       textarea {
-        background: rgba(255,255,255,0.9) !important;
+        background: rgba(255,255,255,0.95) !important;
         color: #333 !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        border-radius: 8px !important;
+        border: 2px solid var(--theme-primary, #4ec5d4) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
       }
       
       /* Main content buttons */
-      button:not(.hov-theme-button) {
-        background: rgba(255,255,255,0.2) !important;
+      button:not(.hov-theme-button):not(.hov-theme-option) {
+        background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%) !important;
         color: white !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        border-radius: 6px !important;
+        border: none !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+      }
+      
+      button:not(.hov-theme-button):not(.hov-theme-option):hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
       }
       
       /* Custom header */
@@ -169,7 +201,8 @@
         font-weight: bold;
         color: white !important;
         margin-right: 15px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+        font-size: 18px;
       }
       
       /* Override dark text classes */
@@ -184,7 +217,7 @@
       
       /* Smooth transitions */
       * {
-        transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
       }
     `;
     
@@ -206,7 +239,7 @@
     // Update button color
     const button = document.querySelector('.hov-theme-button');
     if (button) {
-      button.style.background = theme.primary;
+      button.style.background = `linear-gradient(135deg, ${theme.primary} 0%, ${theme.secondary} 100%)`;
     }
     
     currentTheme = themeName;
@@ -228,14 +261,15 @@
     button.className = 'hov-theme-button';
     button.innerHTML = '🎨 Themes';
     button.style.cssText = `
-      background: var(--theme-primary, #4ec5d4);
+      background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
+      padding: 12px 24px;
+      border-radius: 30px;
       cursor: pointer;
-      font-size: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
       user-select: none;
       transition: all 0.3s ease;
     `;
@@ -247,33 +281,40 @@
       top: 100%;
       right: 0;
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       display: none;
-      min-width: 180px;
-      margin-top: 5px;
+      min-width: 200px;
+      margin-top: 8px;
       overflow: hidden;
+      backdrop-filter: blur(10px);
     `;
     
-    // Add theme options
+    // Add theme options with proper dark text
     Object.keys(themes).forEach(themeName => {
       const option = document.createElement('div');
       option.innerHTML = themes[themeName].name;
       option.className = 'hov-theme-option';
       option.style.cssText = `
-        padding: 12px 15px;
+        padding: 15px 20px;
         cursor: pointer;
-        color: #333;
-        font-size: 14px;
-        transition: background 0.2s ease;
+        color: #333 !important;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
       `;
       
       option.addEventListener('mouseenter', () => {
-        option.style.background = '#f0f0f0';
+        option.style.background = '#f8f9fa';
+        option.style.borderLeft = `4px solid ${themes[themeName].primary}`;
+        option.style.transform = 'translateX(5px)';
       });
       
       option.addEventListener('mouseleave', () => {
         option.style.background = 'transparent';
+        option.style.borderLeft = '4px solid transparent';
+        option.style.transform = 'translateX(0)';
       });
       
       option.addEventListener('click', (e) => {
@@ -295,7 +336,6 @@
       e.preventDefault();
       isDragging = true;
       
-      // Store where the mouse was clicked relative to the button
       const rect = container.getBoundingClientRect();
       dragStartX = e.clientX - rect.left;
       dragStartY = e.clientY - rect.top;
@@ -309,18 +349,15 @@
       
       e.preventDefault();
       
-      // Calculate new position
       const newX = e.clientX - dragStartX;
       const newY = e.clientY - dragStartY;
       
-      // Keep button on screen
       const maxX = window.innerWidth - container.offsetWidth;
       const maxY = window.innerHeight - container.offsetHeight;
       
       const constrainedX = Math.max(0, Math.min(newX, maxX));
       const constrainedY = Math.max(0, Math.min(newY, maxY));
       
-      // Update position
       container.style.left = constrainedX + 'px';
       container.style.top = constrainedY + 'px';
       container.style.right = 'auto';
@@ -360,9 +397,9 @@
   // Initialize extension
   function init() {
     console.log('House of Vibes Extension loaded! 🎉');
-    injectStyles(); // Inject CSS first
+    injectStyles();
     createThemeSwitcher();
-    applyTheme('ocean'); // Start with ocean theme
+    applyTheme('ocean');
   }
 
   // Wait for page to load
