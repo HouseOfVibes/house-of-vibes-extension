@@ -1,72 +1,195 @@
-// House of Vibes Extension - Theme Switcher with Draggable Button
-// Version 1.1 - Working theme system with movable button
+// House of Vibes Extension - Complete Theme System
+// Version 2.0 - Includes CSS injection for styling
 
 (function() {
-  // Theme Configuration
- const themes = {
-  sunset: {
-    name: "🌅 Sunset Vibes",
-    primary: "#ff6b35",
-    secondary: "#f54888",
-    background: "linear-gradient(135deg, #ff6b35 0%, #f54888 100%)"
-  },
-  ocean: {
-    name: "🌊 Ocean Breeze", 
-    primary: "#4ec5d4",
-    secondary: "#72c6ef",
-    background: "linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%)"
-  },
-  spring: {
-    name: "🌿 Spring Fresh",
-    primary: "#00b894",
-    secondary: "#6c5ce7",
-    background: "linear-gradient(135deg, #00b894 0%, #6c5ce7 100%)"
-  },
-  tropical: {
-    name: "🏝️ Tropical",
-    primary: "#17a2b8",
-    secondary: "#6f42c1",
-    background: "linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)"
-  },
-  energy: {
-    name: "🔥 Energy Burst",
-    primary: "#e74c3c",
-    secondary: "#f39c12",
-    background: "linear-gradient(135deg, #e74c3c 0%, #f39c12 100%)"
-  },
-  focus: {
-    name: "⚡ Focus Mode",
-    primary: "#3498db",
-    secondary: "#5dade2",
-    background: "linear-gradient(135deg, #3498db 0%, #5dade2 100%)"
-  },
-  calm: {
-    name: "🧘 Calm Focus",
-    primary: "#8e44ad",
-    secondary: "#d7bde2",
-    background: "linear-gradient(135deg, #8e44ad 0%, #d7bde2 100%)"
-  },
-  professional: {
-    name: "💼 Professional",
-    primary: "#1e3a8a",
-    secondary: "#fbbf24",
-    background: "linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #fbbf24 100%)"
-  },
-  creative: {
-    name: "🎨 Creative Flow",
-    primary: "#ec4899",
-    secondary: "#3b82f6",
-    background: "linear-gradient(45deg, #ec4899 0%, #8b5cf6 25%, #3b82f6 50%, #10b981 75%, #f59e0b 100%)"
-  },
-  action: {
-    name: "🎯 Action Time",
-    primary: "#059669",
-    secondary: "#047857",
-    background: "linear-gradient(135deg, #059669 0%, #0891b2 100%)"
-  }
-};
+  // Theme Configuration - All 10 themes
+  const themes = {
+    sunset: {
+      name: "🌅 Sunset Vibes",
+      primary: "#ff6b35",
+      secondary: "#f54888",
+      background: "linear-gradient(135deg, #ff6b35 0%, #f54888 100%)"
+    },
+    ocean: {
+      name: "🌊 Ocean Breeze", 
+      primary: "#4ec5d4",
+      secondary: "#72c6ef",
+      background: "linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%)"
+    },
+    spring: {
+      name: "🌿 Spring Fresh",
+      primary: "#00b894",
+      secondary: "#6c5ce7",
+      background: "linear-gradient(135deg, #00b894 0%, #6c5ce7 100%)"
+    },
+    tropical: {
+      name: "🏝️ Tropical",
+      primary: "#17a2b8",
+      secondary: "#6f42c1",
+      background: "linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%)"
+    },
+    energy: {
+      name: "🔥 Energy Burst",
+      primary: "#e74c3c",
+      secondary: "#f39c12",
+      background: "linear-gradient(135deg, #e74c3c 0%, #f39c12 100%)"
+    },
+    focus: {
+      name: "⚡ Focus Mode",
+      primary: "#3498db",
+      secondary: "#5dade2",
+      background: "linear-gradient(135deg, #3498db 0%, #5dade2 100%)"
+    },
+    calm: {
+      name: "🧘 Calm Focus",
+      primary: "#8e44ad",
+      secondary: "#d7bde2",
+      background: "linear-gradient(135deg, #8e44ad 0%, #d7bde2 100%)"
+    },
+    professional: {
+      name: "💼 Professional",
+      primary: "#1e3a8a",
+      secondary: "#fbbf24",
+      background: "linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #fbbf24 100%)"
+    },
+    creative: {
+      name: "🎨 Creative Flow",
+      primary: "#ec4899",
+      secondary: "#3b82f6",
+      background: "linear-gradient(45deg, #ec4899 0%, #8b5cf6 25%, #3b82f6 50%, #10b981 75%, #f59e0b 100%)"
+    },
+    action: {
+      name: "🎯 Action Time",
+      primary: "#059669",
+      secondary: "#047857",
+      background: "linear-gradient(135deg, #059669 0%, #0891b2 100%)"
+    }
+  };
 
   let currentTheme = 'ocean';
+
+  // Inject CSS styles directly into the page
+  function injectStyles() {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      /* House of Vibes Extension - Injected Styles */
+      
+      /* Theme variables */
+      :root {
+        --theme-primary: #4ec5d4;
+        --theme-secondary: #72c6ef;
+        --theme-background: linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%);
+      }
+      
+      /* Apply theme background */
+      body {
+        background: var(--theme-background) !important;
+        transition: background 0.3s ease;
+      }
+      
+      /* FORCE sidebar styling - multiple selectors for compatibility */
+      aside,
+      nav,
+      .sidebar,
+      .navigation,
+      [class*="sidebar"],
+      [class*="w-64"],
+      [class*="w-60"],
+      .fixed.left-0,
+      .fixed.top-0.left-0,
+      [data-element-id="side-bar"] {
+        background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%) !important;
+        backdrop-filter: blur(10px) !important;
+        border-right: 1px solid rgba(255,255,255,0.2) !important;
+      }
+      
+      /* FORCE all text to be white */
+      body *:not(input):not(textarea),
+      aside *,
+      nav *,
+      .sidebar *,
+      .navigation *,
+      [class*="sidebar"] *,
+      [class*="w-64"] *,
+      [class*="w-60"] *,
+      .fixed.left-0 *,
+      [data-element-id="side-bar"] * {
+        color: white !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3) !important;
+      }
+      
+      /* Sidebar buttons and items */
+      aside button,
+      nav button,
+      nav .flex,
+      nav .p-2,
+      nav .p-3,
+      .sidebar button,
+      .sidebar .flex,
+      [class*="sidebar"] button,
+      [class*="w-64"] button,
+      [class*="w-60"] button {
+        background: rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        color: white !important;
+      }
+      
+      /* Sidebar hover effects */
+      aside button:hover,
+      nav button:hover,
+      .sidebar button:hover,
+      [class*="sidebar"] button:hover {
+        background: rgba(255,255,255,0.3) !important;
+        transform: translateX(5px) !important;
+      }
+      
+      /* Input fields - keep dark for readability */
+      input, 
+      textarea {
+        background: rgba(255,255,255,0.9) !important;
+        color: #333 !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        border-radius: 8px !important;
+      }
+      
+      /* Main content buttons */
+      button:not(.hov-theme-button) {
+        background: rgba(255,255,255,0.2) !important;
+        color: white !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        border-radius: 6px !important;
+      }
+      
+      /* Custom header */
+      [data-element-id="header-container"]::before,
+      header::before,
+      .header::before {
+        content: "🏠 House of Vibes";
+        font-weight: bold;
+        color: white !important;
+        margin-right: 15px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      }
+      
+      /* Override dark text classes */
+      .text-gray-500,
+      .text-gray-600,
+      .text-gray-700,
+      .text-gray-800,
+      .text-gray-900,
+      .text-black {
+        color: white !important;
+      }
+      
+      /* Smooth transitions */
+      * {
+        transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+      }
+    `;
+    
+    document.head.appendChild(styleEl);
+  }
 
   // Apply theme
   function applyTheme(themeName) {
@@ -166,8 +289,6 @@
     let isDragging = false;
     let dragStartX = 0;
     let dragStartY = 0;
-    let containerStartX = 0;
-    let containerStartY = 0;
     
     // Make container draggable
     button.addEventListener('mousedown', (e) => {
@@ -239,6 +360,7 @@
   // Initialize extension
   function init() {
     console.log('House of Vibes Extension loaded! 🎉');
+    injectStyles(); // Inject CSS first
     createThemeSwitcher();
     applyTheme('ocean'); // Start with ocean theme
   }
