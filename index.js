@@ -1,5 +1,5 @@
-// House of Vibes Extension - Complete Theme System
-// Version 2.1 - Fixed sidebar and dropdown styling
+// House of Vibes Extension - Complete Theme System + File Browser
+// Version 2.2 - Added Visual File Browser
 
 (function() {
   // Theme Configuration - All 10 themes
@@ -68,6 +68,16 @@
 
   let currentTheme = 'ocean';
 
+  // Mock file data - replace with actual file retrieval later
+  const mockFiles = [
+    { name: 'Project Ideas.md', type: 'document', size: '2.3 KB', modified: '2 days ago', icon: '📄' },
+    { name: 'Client Meeting Notes.txt', type: 'document', size: '1.8 KB', modified: '1 day ago', icon: '📝' },
+    { name: 'Design Assets', type: 'folder', items: '15', modified: '3 hours ago', icon: '📁' },
+    { name: 'Screenshot_2024.png', type: 'image', size: '1.2 MB', modified: '5 hours ago', icon: '🖼️' },
+    { name: 'Budget.xlsx', type: 'spreadsheet', size: '45 KB', modified: '1 week ago', icon: '📊' },
+    { name: 'Presentation.pptx', type: 'presentation', size: '8.5 MB', modified: '3 days ago', icon: '📺' }
+  ];
+
   // Inject CSS styles directly into the page
   function injectStyles() {
     const styleEl = document.createElement('style');
@@ -126,7 +136,7 @@
       }
       
       /* ALL text white */
-      body *:not(input):not(textarea):not(.hov-theme-option),
+      body *:not(input):not(textarea):not(.hov-theme-option):not(.file-card-name):not(.file-card-info),
       aside *,
       nav *,
       .sidebar *,
@@ -179,7 +189,7 @@
       }
       
       /* Main content buttons */
-      button:not(.hov-theme-button):not(.hov-theme-option) {
+      button:not(.hov-theme-button):not(.hov-theme-option):not(.file-browser-close) {
         background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%) !important;
         color: white !important;
         border: none !important;
@@ -188,7 +198,7 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
       }
       
-      button:not(.hov-theme-button):not(.hov-theme-option):hover {
+      button:not(.hov-theme-button):not(.hov-theme-option):not(.file-browser-close):hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
       }
@@ -203,6 +213,109 @@
         margin-right: 15px;
         text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
         font-size: 18px;
+      }
+      
+      /* File Browser Styles */
+      .file-browser-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        width: 70vw;
+        height: 80vh;
+        z-index: 9998;
+        display: none;
+      }
+      
+      .file-browser-header {
+        background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%);
+        padding: 20px;
+        border-radius: 20px 20px 0 0;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .file-browser-title {
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      }
+      
+      .file-browser-close {
+        background: rgba(255,255,255,0.2) !important;
+        border: none !important;
+        color: white !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        cursor: pointer !important;
+        font-size: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .file-browser-close:hover {
+        background: rgba(255,255,255,0.3) !important;
+        transform: scale(1.1) !important;
+      }
+      
+      .file-browser-content {
+        padding: 20px;
+        height: calc(100% - 80px);
+        overflow-y: auto;
+      }
+      
+      .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        padding: 10px 0;
+      }
+      
+      .file-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+      
+      .file-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: var(--theme-primary, #4ec5d4);
+      }
+      
+      .file-card-icon {
+        font-size: 48px;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      
+      .file-card-name {
+        font-weight: bold;
+        color: #333 !important;
+        font-size: 16px;
+        margin-bottom: 8px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      
+      .file-card-info {
+        color: #666 !important;
+        font-size: 14px;
+        line-height: 1.4;
       }
       
       /* Override dark text classes */
@@ -244,6 +357,61 @@
     
     currentTheme = themeName;
     console.log(`Applied theme: ${theme.name}`);
+  }
+
+  // Create file browser widget
+  function createFileBrowser() {
+    const container = document.createElement('div');
+    container.className = 'file-browser-container';
+    
+    // Header
+    const header = document.createElement('div');
+    header.className = 'file-browser-header';
+    header.innerHTML = `
+      <div class="file-browser-title">📁 File Explorer</div>
+      <button class="file-browser-close">×</button>
+    `;
+    
+    // Content
+    const content = document.createElement('div');
+    content.className = 'file-browser-content';
+    
+    // File grid
+    const fileGrid = document.createElement('div');
+    fileGrid.className = 'file-grid';
+    
+    // Add files
+    mockFiles.forEach(file => {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.innerHTML = `
+        <div class="file-card-icon">${file.icon}</div>
+        <div class="file-card-name">${file.name}</div>
+        <div class="file-card-info">
+          ${file.type === 'folder' ? `${file.items} items` : file.size}<br>
+          Modified ${file.modified}
+        </div>
+      `;
+      
+      card.addEventListener('click', () => {
+        console.log(`Opening file: ${file.name}`);
+        // Add file opening logic here
+      });
+      
+      fileGrid.appendChild(card);
+    });
+    
+    content.appendChild(fileGrid);
+    container.appendChild(header);
+    container.appendChild(content);
+    document.body.appendChild(container);
+    
+    // Close button functionality
+    header.querySelector('.file-browser-close').addEventListener('click', () => {
+      container.style.display = 'none';
+    });
+    
+    return container;
   }
 
   // Create theme switcher dropdown
@@ -394,11 +562,56 @@
     return container;
   }
 
+  // Create file browser button (floating action button)
+  function createFileBrowserButton() {
+    const button = document.createElement('button');
+    button.className = 'file-browser-fab';
+    button.innerHTML = '📁 Files';
+    button.style.cssText = `
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%);
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    `;
+    
+    button.addEventListener('mouseenter', () => {
+      button.style.transform = 'scale(1.1)';
+      button.style.boxShadow = '0 6px 25px rgba(0,0,0,0.3)';
+    });
+    
+    button.addEventListener('mouseleave', () => {
+      button.style.transform = 'scale(1)';
+      button.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
+    });
+    
+    button.addEventListener('click', () => {
+      const browser = document.querySelector('.file-browser-container');
+      if (browser) {
+        browser.style.display = browser.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+    
+    document.body.appendChild(button);
+    return button;
+  }
+
   // Initialize extension
   function init() {
     console.log('House of Vibes Extension loaded! 🎉');
     injectStyles();
     createThemeSwitcher();
+    createFileBrowserButton();
+    createFileBrowser();
     applyTheme('ocean');
   }
 
