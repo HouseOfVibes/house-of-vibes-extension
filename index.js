@@ -1,5 +1,5 @@
-// House of Vibes Extension - Complete Theme System + File Browser
-// Version 2.2 - Added Visual File Browser
+// House of Vibes Extension - Fixed Version  
+// Version 2.3 - Better TypingMind compatibility
 
 (function() {
   // Theme Configuration - All 10 themes
@@ -7,11 +7,11 @@
     sunset: {
       name: "🌅 Sunset Vibes",
       primary: "#ff6b35",
-      secondary: "#f54888",
+      secondary: "#f54888", 
       background: "linear-gradient(135deg, #ff6b35 0%, #f54888 100%)"
     },
     ocean: {
-      name: "🌊 Ocean Breeze", 
+      name: "🌊 Ocean Breeze",
       primary: "#4ec5d4",
       secondary: "#72c6ef",
       background: "linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%)"
@@ -68,7 +68,7 @@
 
   let currentTheme = 'ocean';
 
-  // Mock file data - replace with actual file retrieval later
+  // Mock file data
   const mockFiles = [
     { name: 'Project Ideas.md', type: 'document', size: '2.3 KB', modified: '2 days ago', icon: '📄' },
     { name: 'Client Meeting Notes.txt', type: 'document', size: '1.8 KB', modified: '1 day ago', icon: '📝' },
@@ -78,11 +78,11 @@
     { name: 'Presentation.pptx', type: 'presentation', size: '8.5 MB', modified: '3 days ago', icon: '📺' }
   ];
 
-  // Inject CSS styles directly into the page
+  // Inject CSS styles (more targeted)
   function injectStyles() {
     const styleEl = document.createElement('style');
     styleEl.textContent = `
-      /* House of Vibes Extension - Enhanced Styles */
+      /* House of Vibes Extension - Light Touch Styles */
       
       /* Theme variables */
       :root {
@@ -91,148 +91,45 @@
         --theme-background: linear-gradient(135deg, #4ec5d4 0%, #72c6ef 100%);
       }
       
-      /* Apply theme background */
+      /* ONLY apply background to body */
       body {
         background: var(--theme-background) !important;
-        transition: background 0.3s ease;
       }
       
-      /* Sidebar styling - blend with theme colors */
-      aside,
-      nav,
-      .sidebar,
-      .navigation,
-      [class*="sidebar"],
-      [class*="w-64"],
-      [class*="w-60"],
-      .fixed.left-0,
-      .fixed.top-0.left-0,
-      [data-element-id="side-bar"] {
-        background: 
-          linear-gradient(135deg, 
-            var(--theme-primary, #4ec5d4) 0%, 
-            rgba(255,255,255,0.1) 30%, 
-            rgba(255,255,255,0.05) 100%
-          ) !important;
-        backdrop-filter: blur(15px) !important;
-        border-right: 1px solid rgba(255,255,255,0.3) !important;
-        position: relative;
-      }
-      
-      /* Add subtle gradient overlay to sidebar */
-      aside::before,
-      nav::before,
-      .sidebar::before,
-      [class*="w-64"]::before,
-      [class*="w-60"]::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-        pointer-events: none;
-      }
-      
-      /* ALL text white */
-      body *:not(input):not(textarea):not(.hov-theme-option):not(.file-card-name):not(.file-card-info),
-      aside *,
-      nav *,
+      /* Light styling for text readability */
       .sidebar *,
-      .navigation *,
-      [class*="sidebar"] *,
-      [class*="w-64"] *,
-      [class*="w-60"] *,
-      .fixed.left-0 *,
-      [data-element-id="side-bar"] * {
+      nav *,
+      aside * {
         color: white !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.4) !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
       }
       
-      /* Sidebar buttons with better styling */
-      aside button,
-      nav button,
-      nav .flex,
-      nav .p-2,
-      nav .p-3,
-      .sidebar button,
-      .sidebar .flex,
-      [class*="sidebar"] button,
-      [class*="w-64"] button,
-      [class*="w-60"] button {
-        background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%) !important;
-        border-radius: 12px !important;
-        transition: all 0.3s ease !important;
-        color: white !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-      }
-      
-      /* Sidebar hover effects */
-      aside button:hover,
-      nav button:hover,
-      .sidebar button:hover,
-      [class*="sidebar"] button:hover {
-        background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%) !important;
-        transform: translateX(8px) scale(1.02) !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-      }
-      
-      /* Input fields */
-      input, 
-      textarea {
-        background: rgba(255,255,255,0.95) !important;
-        color: #333 !important;
-        border: 2px solid var(--theme-primary, #4ec5d4) !important;
-        border-radius: 10px !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-      }
-      
-      /* Main content buttons */
-      button:not(.hov-theme-button):not(.hov-theme-option):not(.file-browser-close) {
-        background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%) !important;
+      /* Keep original button functionality, just style them */
+      .hov-theme-button,
+      .hov-file-button {
+        background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 8px !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-      }
-      
-      button:not(.hov-theme-button):not(.hov-theme-option):not(.file-browser-close):hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-      }
-      
-      /* Custom header */
-      [data-element-id="header-container"]::before,
-      header::before,
-      .header::before {
-        content: "🏠 House of Vibes";
-        font-weight: bold;
-        color: white !important;
-        margin-right: 15px;
-        text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-        font-size: 18px;
       }
       
       /* File Browser Styles */
-      .file-browser-container {
+      .hov-file-browser {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(20px);
+        background: white;
         border-radius: 20px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        width: 70vw;
-        height: 80vh;
-        z-index: 9998;
+        width: 800px;
+        height: 600px;
+        z-index: 10001;
         display: none;
       }
       
-      .file-browser-header {
-        background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%);
+      .hov-file-header {
+        background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
         padding: 20px;
         border-radius: 20px 20px 0 0;
         color: white;
@@ -241,96 +138,61 @@
         align-items: center;
       }
       
-      .file-browser-title {
-        font-size: 24px;
-        font-weight: bold;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-      }
-      
-      .file-browser-close {
-        background: rgba(255,255,255,0.2) !important;
-        border: none !important;
-        color: white !important;
-        width: 40px !important;
-        height: 40px !important;
-        border-radius: 50% !important;
-        cursor: pointer !important;
-        font-size: 20px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        transition: all 0.3s ease !important;
-      }
-      
-      .file-browser-close:hover {
-        background: rgba(255,255,255,0.3) !important;
-        transform: scale(1.1) !important;
-      }
-      
-      .file-browser-content {
+      .hov-file-content {
         padding: 20px;
         height: calc(100% - 80px);
         overflow-y: auto;
       }
       
-      .file-grid {
+      .hov-file-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 15px;
-        padding: 10px 0;
       }
       
-      .file-card {
+      .hov-file-card {
         background: white;
         border-radius: 15px;
         padding: 20px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
         cursor: pointer;
-        border: 2px solid transparent;
+        border: 2px solid #eee;
       }
       
-      .file-card:hover {
+      .hov-file-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        border-color: var(--theme-primary, #4ec5d4);
+        border-color: var(--theme-primary);
       }
       
-      .file-card-icon {
+      .hov-file-icon {
         font-size: 48px;
         text-align: center;
         margin-bottom: 15px;
       }
       
-      .file-card-name {
+      .hov-file-name {
         font-weight: bold;
-        color: #333 !important;
+        color: #333;
         font-size: 16px;
         margin-bottom: 8px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
       }
       
-      .file-card-info {
-        color: #666 !important;
+      .hov-file-info {
+        color: #666;
         font-size: 14px;
-        line-height: 1.4;
       }
       
-      /* Override dark text classes */
-      .text-gray-500,
-      .text-gray-600,
-      .text-gray-700,
-      .text-gray-800,
-      .text-gray-900,
-      .text-black {
+      .hov-close-btn {
+        background: rgba(255,255,255,0.2) !important;
+        border: none !important;
         color: white !important;
-      }
-      
-      /* Smooth transitions */
-      * {
-        transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        font-size: 20px !important;
+        cursor: pointer !important;
       }
     `;
     
@@ -346,78 +208,64 @@
     document.documentElement.style.setProperty('--theme-secondary', theme.secondary);
     document.documentElement.style.setProperty('--theme-background', theme.background);
     
-    // Apply to body immediately
     document.body.style.background = theme.background;
     
-    // Update button color
-    const button = document.querySelector('.hov-theme-button');
-    if (button) {
-      button.style.background = `linear-gradient(135deg, ${theme.primary} 0%, ${theme.secondary} 100%)`;
-    }
+    // Update buttons
+    document.querySelectorAll('.hov-theme-button, .hov-file-button').forEach(btn => {
+      if (btn) {
+        btn.style.background = `linear-gradient(135deg, ${theme.primary} 0%, ${theme.secondary} 100%)`;
+      }
+    });
     
     currentTheme = themeName;
     console.log(`Applied theme: ${theme.name}`);
   }
 
-  // Create file browser widget
+  // Create file browser
   function createFileBrowser() {
-    const container = document.createElement('div');
-    container.className = 'file-browser-container';
+    const browser = document.createElement('div');
+    browser.className = 'hov-file-browser';
     
-    // Header
     const header = document.createElement('div');
-    header.className = 'file-browser-header';
+    header.className = 'hov-file-header';
     header.innerHTML = `
-      <div class="file-browser-title">📁 File Explorer</div>
-      <button class="file-browser-close">×</button>
+      <h3>📁 File Explorer</h3>
+      <button class="hov-close-btn">×</button>
     `;
     
-    // Content
     const content = document.createElement('div');
-    content.className = 'file-browser-content';
+    content.className = 'hov-file-content';
     
-    // File grid
-    const fileGrid = document.createElement('div');
-    fileGrid.className = 'file-grid';
+    const grid = document.createElement('div');
+    grid.className = 'hov-file-grid';
     
-    // Add files
     mockFiles.forEach(file => {
       const card = document.createElement('div');
-      card.className = 'file-card';
+      card.className = 'hov-file-card';
       card.innerHTML = `
-        <div class="file-card-icon">${file.icon}</div>
-        <div class="file-card-name">${file.name}</div>
-        <div class="file-card-info">
-          ${file.type === 'folder' ? `${file.items} items` : file.size}<br>
-          Modified ${file.modified}
-        </div>
+        <div class="hov-file-icon">${file.icon}</div>
+        <div class="hov-file-name">${file.name}</div>
+        <div class="hov-file-info">${file.type === 'folder' ? `${file.items} items` : file.size}<br>Modified ${file.modified}</div>
       `;
-      
-      card.addEventListener('click', () => {
-        console.log(`Opening file: ${file.name}`);
-        // Add file opening logic here
-      });
-      
-      fileGrid.appendChild(card);
+      grid.appendChild(card);
     });
     
-    content.appendChild(fileGrid);
-    container.appendChild(header);
-    container.appendChild(content);
-    document.body.appendChild(container);
+    content.appendChild(grid);
+    browser.appendChild(header);
+    browser.appendChild(content);
+    document.body.appendChild(browser);
     
-    // Close button functionality
-    header.querySelector('.file-browser-close').addEventListener('click', () => {
-      container.style.display = 'none';
-    });
+    // Close button
+    header.querySelector('.hov-close-btn').onclick = () => {
+      browser.style.display = 'none';
+    };
     
-    return container;
+    return browser;
   }
 
-  // Create theme switcher dropdown
+  // Create theme switcher
   function createThemeSwitcher() {
     const container = document.createElement('div');
-    container.className = 'hov-theme-container';
     container.style.cssText = `
       position: fixed;
       top: 20px;
@@ -429,21 +277,15 @@
     button.className = 'hov-theme-button';
     button.innerHTML = '🎨 Themes';
     button.style.cssText = `
-      background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%);
-      color: white;
-      border: none;
       padding: 12px 24px;
       border-radius: 30px;
       cursor: pointer;
       font-size: 16px;
       font-weight: bold;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      user-select: none;
-      transition: all 0.3s ease;
     `;
     
     const dropdown = document.createElement('div');
-    dropdown.className = 'hov-theme-dropdown';
     dropdown.style.cssText = `
       position: absolute;
       top: 100%;
@@ -454,106 +296,66 @@
       display: none;
       min-width: 200px;
       margin-top: 8px;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
     `;
     
-    // Add theme options with proper dark text
     Object.keys(themes).forEach(themeName => {
       const option = document.createElement('div');
       option.innerHTML = themes[themeName].name;
-      option.className = 'hov-theme-option';
       option.style.cssText = `
         padding: 15px 20px;
         cursor: pointer;
-        color: #333 !important;
+        color: #333;
         font-size: 16px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border-left: 4px solid transparent;
+        transition: background 0.2s ease;
       `;
       
-      option.addEventListener('mouseenter', () => {
-        option.style.background = '#f8f9fa';
-        option.style.borderLeft = `4px solid ${themes[themeName].primary}`;
-        option.style.transform = 'translateX(5px)';
-      });
-      
-      option.addEventListener('mouseleave', () => {
-        option.style.background = 'transparent';
-        option.style.borderLeft = '4px solid transparent';
-        option.style.transform = 'translateX(0)';
-      });
-      
-      option.addEventListener('click', (e) => {
+      option.onmouseenter = () => option.style.background = '#f0f0f0';
+      option.onmouseleave = () => option.style.background = 'transparent';
+      option.onclick = (e) => {
         e.stopPropagation();
         applyTheme(themeName);
         dropdown.style.display = 'none';
-      });
+      };
       
       dropdown.appendChild(option);
     });
     
-    // Dragging variables
+    // Make draggable 
     let isDragging = false;
-    let dragStartX = 0;
-    let dragStartY = 0;
+    let startX, startY;
     
-    // Make container draggable
-    button.addEventListener('mousedown', (e) => {
-      e.preventDefault();
+    button.onmousedown = (e) => {
       isDragging = true;
-      
-      const rect = container.getBoundingClientRect();
-      dragStartX = e.clientX - rect.left;
-      dragStartY = e.clientY - rect.top;
-      
-      container.style.cursor = 'grabbing';
-      document.body.style.userSelect = 'none';
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      
+      startX = e.clientX - container.offsetLeft;
+      startY = e.clientY - container.offsetTop;
       e.preventDefault();
-      
-      const newX = e.clientX - dragStartX;
-      const newY = e.clientY - dragStartY;
-      
-      const maxX = window.innerWidth - container.offsetWidth;
-      const maxY = window.innerHeight - container.offsetHeight;
-      
-      const constrainedX = Math.max(0, Math.min(newX, maxX));
-      const constrainedY = Math.max(0, Math.min(newY, maxY));
-      
-      container.style.left = constrainedX + 'px';
-      container.style.top = constrainedY + 'px';
+    };
+    
+    document.onmousemove = (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      container.style.left = (e.clientX - startX) + 'px';
+      container.style.top = (e.clientY - startY) + 'px';
       container.style.right = 'auto';
-      container.style.bottom = 'auto';
-    });
+    };
     
-    document.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        container.style.cursor = 'pointer';
-        document.body.style.userSelect = '';
-      }
-    });
+    document.onmouseup = () => {
+      isDragging = false;
+    };
     
-    // Toggle dropdown
-    button.addEventListener('click', (e) => {
+    button.onclick = (e) => {
       if (!isDragging) {
         e.stopPropagation();
         dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
       }
-    });
+    };
     
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
+    // Close dropdown on outside click
+    document.onclick = (e) => {
       if (!container.contains(e.target)) {
         dropdown.style.display = 'none';
       }
-    });
+    };
     
     container.appendChild(button);
     container.appendChild(dropdown);
@@ -562,44 +364,30 @@
     return container;
   }
 
-  // Create file browser button (floating action button)
+  // Create file browser button
   function createFileBrowserButton() {
     const button = document.createElement('button');
-    button.className = 'file-browser-fab';
+    button.className = 'hov-file-button';
     button.innerHTML = '📁 Files';
     button.style.cssText = `
       position: fixed;
       bottom: 30px;
       right: 30px;
       z-index: 9999;
-      background: linear-gradient(135deg, var(--theme-primary, #4ec5d4) 0%, var(--theme-secondary, #72c6ef) 100%);
-      color: white;
-      border: none;
       padding: 15px 25px;
       border-radius: 50px;
       cursor: pointer;
       font-size: 18px;
       font-weight: bold;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
     `;
     
-    button.addEventListener('mouseenter', () => {
-      button.style.transform = 'scale(1.1)';
-      button.style.boxShadow = '0 6px 25px rgba(0,0,0,0.3)';
-    });
-    
-    button.addEventListener('mouseleave', () => {
-      button.style.transform = 'scale(1)';
-      button.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
-    });
-    
-    button.addEventListener('click', () => {
-      const browser = document.querySelector('.file-browser-container');
+    button.onclick = () => {
+      const browser = document.querySelector('.hov-file-browser');
       if (browser) {
         browser.style.display = browser.style.display === 'none' ? 'block' : 'none';
       }
-    });
+    };
     
     document.body.appendChild(button);
     return button;
@@ -608,14 +396,18 @@
   // Initialize extension
   function init() {
     console.log('House of Vibes Extension loaded! 🎉');
-    injectStyles();
-    createThemeSwitcher();
-    createFileBrowserButton();
-    createFileBrowser();
-    applyTheme('ocean');
+    
+    // Wait a bit for TypingMind to load
+    setTimeout(() => {
+      injectStyles();
+      createThemeSwitcher();
+      createFileBrowserButton();
+      createFileBrowser();
+      applyTheme('ocean');
+    }, 1000);
   }
 
-  // Wait for page to load
+  // Load when ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
