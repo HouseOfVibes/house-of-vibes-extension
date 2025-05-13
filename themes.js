@@ -1,5 +1,5 @@
 // House of Vibes - Themes Extension
-// Version 1.0 - Pure theme system
+// Version 1.1 - Fixed draggable button
 
 (function() {
   console.log('🎨 House of Vibes Themes loading...');
@@ -145,18 +145,22 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
       }
       
-      /* Theme switcher button */
-      .hov-theme-btn {
+      /* Theme container */
+      .hov-theme-container {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 10000;
+      }
+      
+      /* Theme switcher button */
+      .hov-theme-btn {
         background: linear-gradient(135deg, var(--hov-primary) 0%, var(--hov-secondary) 100%) !important;
         color: white !important;
         border: none !important;
         padding: 12px 24px !important;
         border-radius: 30px !important;
-        cursor: move !important;
+        cursor: pointer !important;
         font-size: 16px !important;
         font-weight: bold !important;
         box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
@@ -237,10 +241,10 @@
     console.log(`🌈 Applied theme: ${theme.name}`);
   }
 
-  // Create theme switcher
+  // Create theme switcher with proper dragging
   function createThemeSwitcher() {
     const container = document.createElement('div');
-    container.style.position = 'relative';
+    container.className = 'hov-theme-container';
     
     const button = document.createElement('button');
     button.className = 'hov-theme-btn';
@@ -274,34 +278,54 @@
       dropdown.appendChild(option);
     });
     
-    // Make draggable
+    // Make draggable - FIXED version
     let isDragging = false;
     let startX, startY;
     
     button.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      startX = e.clientX - container.offsetLeft;
-      startY = e.clientY - container.offsetTop;
-      container.style.position = 'fixed';
       e.preventDefault();
+      isDragging = true;
+      
+      // Calculate offset from button click to container corner
+      const rect = container.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      
+      container.style.cursor = 'grabbing';
+      document.body.style.userSelect = 'none';
     });
     
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       e.preventDefault();
       
-      const x = Math.max(0, Math.min(e.clientX - startX, window.innerWidth - container.offsetWidth));
-      const y = Math.max(0, Math.min(e.clientY - startY, window.innerHeight - container.offsetHeight));
+      // Calculate new position
+      const newX = e.clientX - startX;
+      const newY = e.clientY - startY;
       
-      container.style.left = x + 'px';
-      container.style.top = y + 'px';
+      // Keep button on screen
+      const maxX = window.innerWidth - container.offsetWidth;
+      const maxY = window.innerHeight - container.offsetHeight;
+      
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+      
+      // Update position
+      container.style.left = constrainedX + 'px';
+      container.style.top = constrainedY + 'px';
+      container.style.right = 'auto';
+      container.style.bottom = 'auto';
     });
     
     document.addEventListener('mouseup', () => {
-      isDragging = false;
+      if (isDragging) {
+        isDragging = false;
+        container.style.cursor = 'pointer';
+        document.body.style.userSelect = '';
+      }
     });
     
-    // Toggle dropdown
+    // Toggle dropdown (prevent if dragging)
     button.addEventListener('click', (e) => {
       if (!isDragging) {
         e.stopPropagation();
