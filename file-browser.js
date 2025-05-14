@@ -1,128 +1,320 @@
-// House of Vibes - File Browser Extension
-// Version 2.0 - Real Functionality & Modern Design
+// House of Vibes - Google Drive File Browser
+// Version 3.0 - Real Google Drive Integration
 
 (function() {
-  console.log('📁 House of Vibes File Browser loading...');
+  console.log('📁 House of Vibes Google Drive Browser loading...');
   
-  // Current folder state
-  let currentFolder = '/';
-  let folderHistory = ['/'];
+  // Google Drive API configuration
+  const CLIENT_ID = '30768369486-au122hgqa6oltsuim81b20lj3ljb3qn1.apps.googleusercontent.com';
+  const API_KEY = ''; // Not needed for OAuth
+  const SCOPES = 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email';
   
-  // Enhanced file structure with real content
-  const fileSystem = {
-    '/': {
-      'Project Ideas.md': { 
-        type: 'markdown', 
-        size: '2.3 KB', 
-        modified: '2 days ago', 
-        icon: '📄',
-        content: `# Project Ideas
-
-## 🚀 Upcoming Projects
-- AI-powered content assistant
-- Client onboarding automation
-- Project timeline visualization
-- Smart file organization system
-
-## 💡 Business Development
-- Explore AI integration services
-- Develop SaaS templates
-- Create design system library
-
-## 🎯 Goals for Q2
-- [ ] Launch new service offering
-- [ ] Optimize current workflows  
-- [ ] Expand client base by 30%`
-      },
-      'Meeting Notes/': { type: 'folder', items: 3, modified: '1 day ago', icon: '📁' },
-      'Design Assets/': { type: 'folder', items: 15, modified: '3 hours ago', icon: '📁' },
-      'Client Files/': { type: 'folder', items: 8, modified: '1 week ago', icon: '📁' },
-      'Templates/': { type: 'folder', items: 12, modified: '5 days ago', icon: '📁' }
-    },
-    '/Meeting Notes/': {
-      '../': { type: 'back', icon: '⬅️' },
-      'Client Call - Sarah.txt': { 
-        type: 'text', 
-        size: '1.8 KB', 
-        modified: '1 day ago', 
-        icon: '📝',
-        content: `Client Call Notes - Sarah Johnson
-Date: May 13, 2025
-Duration: 45 minutes
-
-Key Discussion Points:
-- Website redesign timeline
-- Budget approval for Phase 2
-- Mobile responsiveness priority
-- Content strategy concerns
-
-Action Items:
-- Send wireframe revisions by Thursday
-- Schedule design review meeting
-- Prepare content outline
-- Update project timeline
-
-Next Meeting: May 20, 2025`
-      },
-      'Team Standup Notes.md': { 
-        type: 'markdown', 
-        size: '1.2 KB', 
-        modified: '2 days ago', 
-        icon: '📄',
-        content: `# Team Standup - Week 20
-
-## Yesterday's Progress
-- Completed wireframes for client project
-- Fixed responsive issues on landing page  
-- Updated project documentation
-
-## Today's Goals
-- Client presentation prep
-- Code review for new features
-- Design system updates
-
-## Blockers
-- Waiting for client feedback on mockups
-- Need approval for new design direction`
-      },
-      'Project Planning Session.txt': { 
-        type: 'text', 
-        size: '2.1 KB', 
-        modified: '5 days ago', 
-        icon: '📝',
-        content: 'Project planning session notes...'
+  // Authentication state
+  let isAuthenticated = false;
+  let accessToken = null;
+  let userEmail = null;
+  
+  // Navigation state
+  let currentFolderId = 'root';
+  let folderHistory = ['root'];
+  let folderNames = ['My Drive'];
+  let currentFiles = [];
+  
+  // Load Google APIs
+  function loadGoogleAPIs() {
+    return new Promise((resolve) => {
+      if (window.gapi) {
+        resolve();
+        return;
       }
-    },
-    '/Design Assets/': {
-      '../': { type: 'back', icon: '⬅️' },
-      'Logos/': { type: 'folder', items: 8, modified: '2 days ago', icon: '📁' },
-      'Icons/': { type: 'folder', items: 24, modified: '1 day ago', icon: '📁' },
-      'Brand-Guidelines.pdf': { type: 'pdf', size: '5.2 MB', modified: '1 week ago', icon: '📄' },
-      'Color-Palette.figma': { type: 'design', size: '892 KB', modified: '3 days ago', icon: '🎨' },
-      'Hero-Image.jpg': { 
-        type: 'image', 
-        size: '1.2 MB', 
-        modified: '5 hours ago', 
-        icon: '🖼️',
-        preview: '/api/placeholder/400/300'
-      }
-    },
-    '/Client Files/': {
-      '../': { type: 'back', icon: '⬅️' },
-      'Sarah Johnson/': { type: 'folder', items: 5, modified: '2 days ago', icon: '📁' },
-      'Emma Rodriguez/': { type: 'folder', items: 7, modified: '1 week ago', icon: '📁' },
-      'Michael Chen/': { type: 'folder', items: 3, modified: '3 days ago', icon: '📁' }
+      
+      const script = document.createElement('script');
+      script.src = 'https://apis.google.com/js/api.js';
+      script.onload = () => {
+        window.gapi.load('client:auth2', resolve);
+      };
+      document.head.appendChild(script);
+    });
+  }
+  
+  // Initialize Google API client
+  async function initializeGapi() {
+    await window.gapi.client.init({
+      clientId: CLIENT_ID,
+      scope: SCOPES,
+      discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+    });
+    
+    // Check if user is already signed in
+    const authInstance = window.gapi.auth2.getAuthInstance();
+    if (authInstance.isSignedIn.get()) {
+      await handleAuthentication();
     }
-  };
-
-  // Inject modern file browser styles
+  }
+  
+  // Handle authentication
+  async function handleAuthentication() {
+    const authInstance = window.gapi.auth2.getAuthInstance();
+    const user = authInstance.currentUser.get();
+    
+    if (user.hasGrantedScopes(SCOPES)) {
+      isAuthenticated = true;
+      accessToken = user.getAuthResponse().access_token;
+      userEmail = user.getBasicProfile().getEmail();
+      
+      updateAuthUI();
+      await loadFiles();
+    }
+  }
+  
+  // Sign in to Google
+  async function signIn() {
+    try {
+      const authInstance = window.gapi.auth2.getAuthInstance();
+      await authInstance.signIn();
+      await handleAuthentication();
+    } catch (error) {
+      console.error('Authentication failed:', error);
+      showError('Authentication failed. Please try again.');
+    }
+  }
+  
+  // Sign out
+  function signOut() {
+    const authInstance = window.gapi.auth2.getAuthInstance();
+    authInstance.signOut();
+    isAuthenticated = false;
+    accessToken = null;
+    userEmail = null;
+    updateAuthUI();
+    showAuthScreen();
+  }
+  
+  // Update authentication UI
+  function updateAuthUI() {
+    const authBtn = document.querySelector('.hov-auth-btn');
+    const userInfo = document.querySelector('.hov-user-info');
+    
+    if (authBtn && userInfo) {
+      if (isAuthenticated) {
+        authBtn.textContent = 'Sign Out';
+        authBtn.onclick = signOut;
+        userInfo.textContent = userEmail || 'Signed In';
+        userInfo.style.display = 'block';
+      } else {
+        authBtn.textContent = 'Sign In to Google Drive';
+        authBtn.onclick = signIn;
+        userInfo.style.display = 'none';
+      }
+    }
+  }
+  
+  // Load files from Google Drive
+  async function loadFiles(folderId = currentFolderId) {
+    if (!isAuthenticated) {
+      showAuthScreen();
+      return;
+    }
+    
+    try {
+      showLoading(true);
+      
+      const response = await window.gapi.client.drive.files.list({
+        q: `'${folderId}' in parents and trashed=false`,
+        fields: 'files(id,name,mimeType,size,modifiedTime,thumbnailLink,webViewLink)',
+        orderBy: 'folder desc, name'
+      });
+      
+      currentFiles = response.result.files.map(file => ({
+        id: file.id,
+        name: file.name,
+        type: getMimeTypeCategory(file.mimeType),
+        size: formatFileSize(file.size),
+        modified: formatDate(file.modifiedTime),
+        icon: getFileIcon(file.mimeType, file.name),
+        mimeType: file.mimeType,
+        webViewLink: file.webViewLink,
+        thumbnailLink: file.thumbnailLink
+      }));
+      
+      renderFiles(currentFiles);
+      updateBreadcrumbs();
+      showLoading(false);
+      
+    } catch (error) {
+      console.error('Error loading files:', error);
+      showError('Failed to load files. Please try again.');
+      showLoading(false);
+    }
+  }
+  
+  // Get file type category from MIME type
+  function getMimeTypeCategory(mimeType) {
+    if (mimeType === 'application/vnd.google-apps.folder') return 'folder';
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.startsWith('video/')) return 'video';
+    if (mimeType.startsWith('audio/')) return 'audio';
+    if (mimeType.includes('document')) return 'document';
+    if (mimeType.includes('spreadsheet')) return 'spreadsheet';
+    if (mimeType.includes('presentation')) return 'presentation';
+    if (mimeType.includes('pdf')) return 'pdf';
+    if (mimeType.includes('text')) return 'text';
+    return 'file';
+  }
+  
+  // Get file icon based on type
+  function getFileIcon(mimeType, fileName) {
+    const type = getMimeTypeCategory(mimeType);
+    const iconMap = {
+      folder: '📁',
+      image: '🖼️',
+      video: '🎬',
+      audio: '🎵',
+      document: '📄',
+      spreadsheet: '📊',
+      presentation: '📺',
+      pdf: '📄',
+      text: '📝',
+      file: '📎'
+    };
+    return iconMap[type] || '📎';
+  }
+  
+  // Format file size
+  function formatFileSize(bytes) {
+    if (!bytes) return '-';
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  }
+  
+  // Format date
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  }
+  
+  // Navigate to folder
+  async function navigateToFolder(folderId, folderName) {
+    if (folderId === 'back') {
+      // Go back
+      if (folderHistory.length > 1) {
+        folderHistory.pop();
+        folderNames.pop();
+        currentFolderId = folderHistory[folderHistory.length - 1];
+        await loadFiles(currentFolderId);
+      }
+      return;
+    }
+    
+    folderHistory.push(folderId);
+    folderNames.push(folderName);
+    currentFolderId = folderId;
+    await loadFiles(folderId);
+  }
+  
+  // Navigate to breadcrumb
+  async function navigateToBreadcrumb(index) {
+    folderHistory = folderHistory.slice(0, index + 1);
+    folderNames = folderNames.slice(0, index + 1);
+    currentFolderId = folderHistory[folderHistory.length - 1];
+    await loadFiles(currentFolderId);
+  }
+  
+  // Search files
+  async function searchFiles(query) {
+    if (!query) {
+      await loadFiles();
+      return;
+    }
+    
+    try {
+      showLoading(true);
+      
+      const response = await window.gapi.client.drive.files.list({
+        q: `name contains '${query}' and trashed=false`,
+        fields: 'files(id,name,mimeType,size,modifiedTime,thumbnailLink,webViewLink)',
+        orderBy: 'name'
+      });
+      
+      const searchResults = response.result.files.map(file => ({
+        id: file.id,
+        name: file.name,
+        type: getMimeTypeCategory(file.mimeType),
+        size: formatFileSize(file.size),
+        modified: formatDate(file.modifiedTime),
+        icon: getFileIcon(file.mimeType, file.name),
+        mimeType: file.mimeType,
+        webViewLink: file.webViewLink,
+        thumbnailLink: file.thumbnailLink
+      }));
+      
+      renderFiles(searchResults);
+      showLoading(false);
+      
+    } catch (error) {
+      console.error('Search failed:', error);
+      showError('Search failed. Please try again.');
+      showLoading(false);
+    }
+  }
+  
+  // Show loading state
+  function showLoading(show) {
+    const loading = document.querySelector('.hov-loading');
+    if (loading) {
+      loading.style.display = show ? 'flex' : 'none';
+    }
+  }
+  
+  // Show error message
+  function showError(message) {
+    const error = document.querySelector('.hov-error');
+    if (error) {
+      error.textContent = message;
+      error.style.display = 'block';
+      setTimeout(() => {
+        error.style.display = 'none';
+      }, 5000);
+    }
+  }
+  
+  // Show authentication screen
+  function showAuthScreen() {
+    const content = document.querySelector('.hov-file-content');
+    if (!content) return;
+    
+    content.innerHTML = `
+      <div class="hov-auth-screen">
+        <div class="hov-auth-card">
+          <div class="hov-auth-icon">🔒</div>
+          <h2>Connect to Google Drive</h2>
+          <p>Sign in to access your Google Drive files</p>
+          <button class="hov-auth-btn hov-sign-in-btn" onclick="signIn()">
+            Sign In to Google Drive
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Inject Google Drive file browser styles
   function injectFileBrowserStyles() {
     const styleEl = document.createElement('style');
-    styleEl.id = 'house-of-vibes-files';
+    styleEl.id = 'house-of-vibes-gdrive-files';
     styleEl.textContent = `
-      /* House of Vibes - Modern File Browser */
+      /* House of Vibes - Google Drive File Browser */
       
-      /* File browser button - matches theme system */
+      /* File browser button */
       .hov-file-button {
         position: fixed;
         bottom: 30px;
@@ -149,7 +341,7 @@ Next Meeting: May 20, 2025`
         box-shadow: 0 6px 25px rgba(0,0,0,0.15);
       }
       
-      /* Modern file browser modal */
+      /* File browser modal */
       .hov-file-browser {
         position: fixed;
         top: 0;
@@ -194,6 +386,30 @@ Next Meeting: May 20, 2025`
         text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
       }
       
+      .hov-user-info {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        margin-right: 15px;
+      }
+      
+      .hov-auth-btn {
+        background: rgba(255,255,255,0.9);
+        color: var(--hov-primary, #6bb6d6);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+      
+      .hov-auth-btn:hover {
+        background: white;
+        transform: scale(1.05);
+      }
+      
       .hov-file-close {
         background: rgba(255,255,255,0.2);
         border: none;
@@ -218,7 +434,8 @@ Next Meeting: May 20, 2025`
         border-bottom: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
+        flex-wrap: wrap;
       }
       
       .hov-breadcrumb {
@@ -229,6 +446,7 @@ Next Meeting: May 20, 2025`
         padding: 5px 10px;
         border-radius: 6px;
         transition: all 0.2s ease;
+        font-size: 14px;
       }
       
       .hov-breadcrumb:hover {
@@ -238,29 +456,24 @@ Next Meeting: May 20, 2025`
       .hov-breadcrumb.current {
         color: var(--hov-text-color, #1f2937);
         cursor: default;
+        background: rgba(0,0,0,0.05);
       }
       
       .hov-breadcrumb-separator {
         color: #6b7280;
-        font-size: 14px;
+        font-size: 12px;
+        margin: 0 4px;
       }
       
-      /* File content area */
-      .hov-file-content {
-        padding: 20px;
-        flex: 1;
-        overflow-y: auto;
-        background: #fafbfc;
-      }
-      
-      /* File actions toolbar */
+      /* Toolbar */
       .hov-file-toolbar {
         background: white;
         padding: 15px 20px;
         border-bottom: 1px solid #e2e8f0;
         display: flex;
-        gap: 10px;
+        gap: 15px;
         align-items: center;
+        flex-wrap: wrap;
       }
       
       .hov-toolbar-btn {
@@ -284,6 +497,131 @@ Next Meeting: May 20, 2025`
         background: var(--hov-primary, #6bb6d6);
         color: white;
         border-color: var(--hov-primary, #6bb6d6);
+      }
+      
+      /* Search */
+      .hov-file-search {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+      }
+      
+      .hov-search-input {
+        width: 100%;
+        padding: 8px 35px 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+      }
+      
+      .hov-search-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 16px;
+      }
+      
+      /* Content area */
+      .hov-file-content {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+        background: #fafbfc;
+        position: relative;
+      }
+      
+      /* Loading state */
+      .hov-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .hov-loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid var(--hov-primary, #6bb6d6);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Error message */
+      .hov-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: none;
+      }
+      
+      /* Authentication screen */
+      .hov-auth-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #fafbfc;
+      }
+      
+      .hov-auth-card {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-width: 400px;
+      }
+      
+      .hov-auth-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+      }
+      
+      .hov-auth-card h2 {
+        color: var(--hov-text-color, #1f2937);
+        margin-bottom: 10px;
+      }
+      
+      .hov-auth-card p {
+        color: #6b7280;
+        margin-bottom: 25px;
+      }
+      
+      .hov-sign-in-btn {
+        background: var(--hov-primary, #6bb6d6);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .hov-sign-in-btn:hover {
+        background: #5a9bb8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       }
       
       /* File grid */
@@ -345,20 +683,23 @@ Next Meeting: May 20, 2025`
         font-size: 24px;
         width: 32px;
         text-align: center;
+        flex-shrink: 0;
       }
       
       .hov-file-name {
         font-weight: 600;
         color: var(--hov-text-color, #1f2937);
         font-size: 14px;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         word-break: break-word;
+        line-height: 1.3;
       }
       
       .hov-file-list-name {
         font-weight: 600;
         color: var(--hov-text-color, #1f2937);
         flex: 1;
+        margin-right: 12px;
       }
       
       .hov-file-info {
@@ -371,118 +712,27 @@ Next Meeting: May 20, 2025`
         color: #6b7280;
         font-size: 12px;
         text-align: right;
+        flex-shrink: 0;
       }
       
-      /* File preview modal */
-      .hov-file-preview {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        backdrop-filter: blur(15px);
-        z-index: 10002;
-        display: none;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .hov-preview-content {
-        background: white;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 800px;
-        height: 80%;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      }
-      
-      .hov-preview-header {
-        background: var(--hov-primary, #6bb6d6);
-        padding: 15px 20px;
-        color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      
-      .hov-preview-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-      }
-      
-      .hov-preview-text {
-        font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
-        font-size: 14px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        color: var(--hov-text-color, #1f2937);
-      }
-      
-      .hov-preview-markdown {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        line-height: 1.6;
-        color: var(--hov-text-color, #1f2937);
-      }
-      
-      .hov-preview-markdown h1, 
-      .hov-preview-markdown h2, 
-      .hov-preview-markdown h3 {
-        color: var(--hov-primary, #6bb6d6);
-        margin-top: 24px;
-        margin-bottom: 12px;
-      }
-      
-      .hov-preview-markdown code {
+      /* Back button for folders */
+      .hov-back-btn {
         background: #f3f4f6;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
-      }
-      
-      .hov-preview-markdown ul {
-        margin: 12px 0;
-        padding-left: 24px;
-      }
-      
-      .hov-preview-markdown li {
-        margin: 4px 0;
-      }
-      
-      .hov-preview-image {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      }
-      
-      /* Search functionality */
-      .hov-file-search {
-        position: relative;
-        flex: 1;
-        max-width: 300px;
-      }
-      
-      .hov-search-input {
-        width: 100%;
-        padding: 8px 35px 8px 12px;
         border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 8px 16px;
         border-radius: 8px;
+        cursor: pointer;
         font-size: 14px;
-        background: white;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        transition: all 0.2s ease;
       }
       
-      .hov-search-icon {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6b7280;
-        font-size: 16px;
+      .hov-back-btn:hover {
+        background: #e5e7eb;
       }
       
       /* Responsive design */
@@ -499,16 +749,21 @@ Next Meeting: May 20, 2025`
         .hov-file-toolbar {
           flex-wrap: wrap;
         }
+        
+        .hov-file-search {
+          width: 100%;
+          max-width: none;
+        }
       }
     `;
     
     // Remove any existing style
-    const existing = document.getElementById('house-of-vibes-files');
+    const existing = document.getElementById('house-of-vibes-gdrive-files');
     if (existing) existing.remove();
     
     document.head.appendChild(styleEl);
   }
-
+  
   // Make element draggable
   function makeDraggable(element, handle = null) {
     const dragHandle = handle || element;
@@ -516,7 +771,7 @@ Next Meeting: May 20, 2025`
     let startX, startY;
     
     dragHandle.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.hov-file-close')) return;
+      if (e.target.closest('.hov-file-close') || e.target.closest('.hov-auth-btn')) return;
       
       isDragging = true;
       startX = e.clientX - element.offsetLeft;
@@ -545,134 +800,42 @@ Next Meeting: May 20, 2025`
       }
     });
   }
-
-  // Parse markdown to HTML
-  function parseMarkdown(text) {
-    return text
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^\* (.*$)/gm, '<li>$1</li>')
-      .replace(/^- (.*$)/gm, '<li>$1</li>')
-      .replace(/(\r\n|\r|\n)/g, '<br>')
-      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');
-  }
-
-  // Show file preview
-  function showFilePreview(fileName, file) {
-    const preview = document.createElement('div');
-    preview.className = 'hov-file-preview';
-    preview.style.display = 'flex';
-    
-    let contentHtml = '';
-    
-    if (file.type === 'markdown') {
-      contentHtml = `<div class="hov-preview-markdown">${parseMarkdown(file.content)}</div>`;
-    } else if (file.type === 'text') {
-      contentHtml = `<div class="hov-preview-text">${file.content}</div>`;
-    } else if (file.type === 'image') {
-      contentHtml = `<img src="${file.preview}" alt="${fileName}" class="hov-preview-image">`;
-    } else {
-      contentHtml = `<div class="hov-preview-text">Preview not available for this file type.</div>`;
-    }
-    
-    preview.innerHTML = `
-      <div class="hov-preview-content">
-        <div class="hov-preview-header">
-          <h3>${file.icon} ${fileName}</h3>
-          <button class="hov-file-close">×</button>
-        </div>
-        <div class="hov-preview-body">
-          ${contentHtml}
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(preview);
-    
-    // Close preview
-    preview.querySelector('.hov-file-close').onclick = () => {
-      preview.remove();
-    };
-    
-    preview.onclick = (e) => {
-      if (e.target === preview) {
-        preview.remove();
-      }
-    };
-  }
-
-  // Navigate to folder
-  function navigateToFolder(folderPath) {
-    if (folderPath === '../') {
-      // Go back
-      folderHistory.pop();
-      currentFolder = folderHistory[folderHistory.length - 1] || '/';
-    } else {
-      folderHistory.push(folderPath);
-      currentFolder = folderPath;
-    }
-    updateFileView();
-  }
-
-  // Navigate to breadcrumb
-  function navigateToBreadcrumb(path) {
-    const index = folderHistory.indexOf(path);
-    if (index !== -1) {
-      folderHistory = folderHistory.slice(0, index + 1);
-      currentFolder = path;
-      updateFileView();
-    }
-  }
-
-  // Search files
-  function searchFiles(query) {
-    if (!query) {
-      updateFileView();
-      return;
-    }
-    
-    const files = fileSystem[currentFolder] || {};
-    const filtered = {};
-    
-    for (const [name, file] of Object.entries(files)) {
-      if (name.toLowerCase().includes(query.toLowerCase())) {
-        filtered[name] = file;
-      }
-    }
-    
-    renderFiles(filtered);
-  }
-
+  
   // Render files
   function renderFiles(files) {
     const content = document.querySelector('.hov-file-content');
-    const isGridView = document.querySelector('.hov-view-grid').classList.contains('active');
+    const isGridView = document.querySelector('.hov-view-grid')?.classList.contains('active') ?? true;
     
-    content.innerHTML = '';
+    if (!content) return;
+    
+    // Clear existing content
+    const existing = content.querySelector('.hov-file-grid, .hov-file-list, .hov-back-btn');
+    if (existing) existing.remove();
+    
+    // Add back button if not in root folder
+    if (currentFolderId !== 'root') {
+      const backBtn = document.createElement('button');
+      backBtn.className = 'hov-back-btn';
+      backBtn.innerHTML = '<span>←</span> Back';
+      backBtn.onclick = () => navigateToFolder('back');
+      content.insertBefore(backBtn, content.firstChild);
+    }
     
     if (isGridView) {
       const grid = document.createElement('div');
       grid.className = 'hov-file-grid';
       
-      Object.entries(files).forEach(([name, file]) => {
+      files.forEach(file => {
         const card = document.createElement('div');
         card.className = 'hov-file-card';
         
-        const displayInfo = file.type === 'folder' ? 
-          `${file.items} items` : 
-          `${file.size}`;
-        
         card.innerHTML = `
           <div class="hov-file-icon">${file.icon}</div>
-          <div class="hov-file-name">${name}</div>
-          <div class="hov-file-info">${displayInfo}<br>Modified ${file.modified}</div>
+          <div class="hov-file-name">${file.name}</div>
+          <div class="hov-file-info">${file.size}<br>Modified ${file.modified}</div>
         `;
         
-        card.onclick = () => handleFileClick(name, file);
+        card.onclick = () => handleFileClick(file);
         grid.appendChild(card);
       });
       
@@ -681,47 +844,36 @@ Next Meeting: May 20, 2025`
       const list = document.createElement('div');
       list.className = 'hov-file-list';
       
-      Object.entries(files).forEach(([name, file]) => {
+      files.forEach(file => {
         const item = document.createElement('div');
         item.className = 'hov-file-list-item';
         
-        const displayInfo = file.type === 'folder' ? 
-          `${file.items} items` : 
-          `${file.size}`;
-        
         item.innerHTML = `
           <div class="hov-file-list-icon">${file.icon}</div>
-          <div class="hov-file-list-name">${name}</div>
-          <div class="hov-file-list-info">${displayInfo}<br>${file.modified}</div>
+          <div class="hov-file-list-name">${file.name}</div>
+          <div class="hov-file-list-info">${file.size}<br>${file.modified}</div>
         `;
         
-        item.onclick = () => handleFileClick(name, file);
+        item.onclick = () => handleFileClick(file);
         list.appendChild(item);
       });
       
       content.appendChild(list);
     }
   }
-
+  
   // Handle file/folder click
-  function handleFileClick(name, file) {
+  function handleFileClick(file) {
     if (file.type === 'folder') {
-      const folderPath = currentFolder === '/' ? `/${name}/` : `${currentFolder}${name}/`;
-      navigateToFolder(folderPath);
-    } else if (file.type === 'back') {
-      navigateToFolder('../');
+      navigateToFolder(file.id, file.name);
     } else {
-      showFilePreview(name, file);
+      // Open file in Google Drive
+      if (file.webViewLink) {
+        window.open(file.webViewLink, '_blank');
+      }
     }
   }
-
-  // Update file view
-  function updateFileView() {
-    const files = fileSystem[currentFolder] || {};
-    renderFiles(files);
-    updateBreadcrumbs();
-  }
-
+  
   // Update breadcrumbs
   function updateBreadcrumbs() {
     const nav = document.querySelector('.hov-file-nav');
@@ -729,43 +881,42 @@ Next Meeting: May 20, 2025`
     
     let breadcrumbsHtml = '';
     
-    folderHistory.forEach((path, index) => {
-      const isLast = index === folderHistory.length - 1;
-      const name = path === '/' ? 'Home' : path.split('/').filter(Boolean).pop();
+    folderNames.forEach((name, index) => {
+      const isLast = index === folderNames.length - 1;
       
       if (isLast) {
         breadcrumbsHtml += `<span class="hov-breadcrumb current">${name}</span>`;
       } else {
-        breadcrumbsHtml += `<a class="hov-breadcrumb" onclick="navigateToBreadcrumb('${path}')">${name}</a>`;
+        breadcrumbsHtml += `<span class="hov-breadcrumb" onclick="navigateToBreadcrumb(${index})">${name}</span>`;
         breadcrumbsHtml += `<span class="hov-breadcrumb-separator">›</span>`;
       }
     });
     
     nav.innerHTML = breadcrumbsHtml;
   }
-
+  
   // Toggle view
   function toggleView(viewType) {
     document.querySelectorAll('.hov-toolbar-btn[data-view]').forEach(btn => {
       btn.classList.remove('active');
     });
-    document.querySelector(`[data-view="${viewType}"]`).classList.add('active');
-    updateFileView();
+    document.querySelector(`[data-view="${viewType}"]`)?.classList.add('active');
+    renderFiles(currentFiles);
   }
-
+  
   // Create file browser button
   function createFileBrowserButton() {
     const button = document.createElement('button');
     button.className = 'hov-file-button';
-    button.innerHTML = '📁 Files';
+    button.innerHTML = '📁 Drive';
     
     button.onclick = (e) => {
       e.preventDefault();
       const browser = document.querySelector('.hov-file-browser');
       if (browser) {
         browser.style.display = browser.style.display === 'none' ? 'flex' : 'none';
-        if (browser.style.display === 'flex') {
-          updateFileView();
+        if (browser.style.display === 'flex' && isAuthenticated) {
+          loadFiles();
         }
       }
     };
@@ -775,7 +926,7 @@ Next Meeting: May 20, 2025`
     
     return button;
   }
-
+  
   // Create file browser modal
   function createFileBrowser() {
     const browser = document.createElement('div');
@@ -786,8 +937,12 @@ Next Meeting: May 20, 2025`
     
     modal.innerHTML = `
       <div class="hov-file-header">
-        <div class="hov-file-title">📁 File Explorer</div>
-        <button class="hov-file-close">×</button>
+        <div class="hov-file-title">📁 Google Drive</div>
+        <div style="display: flex; align-items: center;">
+          <div class="hov-user-info" style="display: none;"></div>
+          <button class="hov-auth-btn">Sign In to Google Drive</button>
+          <button class="hov-file-close">×</button>
+        </div>
       </div>
       
       <div class="hov-file-nav"></div>
@@ -800,12 +955,18 @@ Next Meeting: May 20, 2025`
           ☰ List
         </button>
         <div class="hov-file-search">
-          <input type="text" class="hov-search-input" placeholder="Search files...">
+          <input type="text" class="hov-search-input" placeholder="Search Google Drive...">
           <span class="hov-search-icon">🔍</span>
         </div>
       </div>
       
-      <div class="hov-file-content"></div>
+      <div class="hov-file-content">
+        <div class="hov-loading">
+          <div class="hov-loading-spinner"></div>
+          <div>Loading files...</div>
+        </div>
+        <div class="hov-error"></div>
+      </div>
     `;
     
     browser.appendChild(modal);
@@ -816,13 +977,13 @@ Next Meeting: May 20, 2025`
     
     // Search functionality
     const searchInput = modal.querySelector('.hov-search-input');
+    let searchTimeout;
     searchInput.addEventListener('input', (e) => {
-      searchFiles(e.target.value);
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchFiles(e.target.value);
+      }, 500);
     });
-    
-    // Make functions globally available
-    window.navigateToBreadcrumb = navigateToBreadcrumb;
-    window.toggleView = toggleView;
     
     // Close browser
     modal.querySelector('.hov-file-close').onclick = () => {
@@ -835,23 +996,38 @@ Next Meeting: May 20, 2025`
       }
     };
     
+    // Update auth UI
+    updateAuthUI();
+    
     return browser;
   }
-
+  
+  // Make functions globally available
+  window.navigateToBreadcrumb = navigateToBreadcrumb;
+  window.toggleView = toggleView;
+  window.signIn = signIn;
+  
   // Initialize file browser extension
-  function init() {
-    console.log('📁 Initializing House of Vibes File Browser...');
+  async function init() {
+    console.log('📁 Initializing House of Vibes Google Drive Browser...');
     
     // Wait for page to be ready
-    setTimeout(() => {
+    setTimeout(async () => {
       injectFileBrowserStyles();
       createFileBrowserButton();
       createFileBrowser();
       
-      console.log('✅ House of Vibes File Browser ready!');
+      // Load Google APIs
+      try {
+        await loadGoogleAPIs();
+        await initializeGapi();
+        console.log('✅ House of Vibes Google Drive Browser ready!');
+      } catch (error) {
+        console.error('Failed to initialize Google Drive API:', error);
+      }
     }, 1500);
   }
-
+  
   // Start when page loads
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
