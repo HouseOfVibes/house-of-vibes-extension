@@ -1,93 +1,155 @@
 // House of Vibes - File Browser Extension
-// Version 1.0 - Visual file manager
+// Version 2.0 - Real Functionality & Modern Design
 
 (function() {
   console.log('📁 House of Vibes File Browser loading...');
   
-  // Mock file data with actions
-  const mockFiles = [
-    { 
-      name: 'Project Ideas.md', 
-      type: 'document', 
-      size: '2.3 KB', 
-      modified: '2 days ago', 
-      icon: '📄',
-      action: () => showFilePreview('Project Ideas.md', '# Project Ideas\n\n- Build a TypingMind extension\n- Create ADHD-friendly tools\n- Design beautiful themes')
-    },
-    { 
-      name: 'Client Meeting Notes.txt', 
-      type: 'document', 
-      size: '1.8 KB', 
-      modified: '1 day ago', 
-      icon: '📝',
-      action: () => alert('📝 Opening Client Meeting Notes.txt\n\nThis would open your text file!')
-    },
-    { 
-      name: 'Design Assets', 
-      type: 'folder', 
-      items: '15', 
-      modified: '3 hours ago', 
-      icon: '📁',
-      action: () => showFolderContents('Design Assets')
-    },
-    { 
-      name: 'Screenshot_2024.png', 
-      type: 'image', 
-      size: '1.2 MB', 
-      modified: '5 hours ago', 
-      icon: '🖼️',
-      action: () => alert('🖼️ Opening Screenshot_2024.png\n\nThis would open the image in a preview window!')
-    },
-    { 
-      name: 'Budget.xlsx', 
-      type: 'spreadsheet', 
-      size: '45 KB', 
-      modified: '1 week ago', 
-      icon: '📊',
-      action: () => alert('📊 Opening Budget.xlsx\n\nThis would open your spreadsheet!')
-    },
-    { 
-      name: 'Presentation.pptx', 
-      type: 'presentation', 
-      size: '8.5 MB', 
-      modified: '3 days ago', 
-      icon: '📺',
-      action: () => alert('📺 Opening Presentation.pptx\n\nThis would open your presentation!')
-    }
-  ];
+  // Current folder state
+  let currentFolder = '/';
+  let folderHistory = ['/'];
+  
+  // Enhanced file structure with real content
+  const fileSystem = {
+    '/': {
+      'Project Ideas.md': { 
+        type: 'markdown', 
+        size: '2.3 KB', 
+        modified: '2 days ago', 
+        icon: '📄',
+        content: `# Project Ideas
 
-  // Inject file browser styles
+## 🚀 Upcoming Projects
+- AI-powered content assistant
+- Client onboarding automation
+- Project timeline visualization
+- Smart file organization system
+
+## 💡 Business Development
+- Explore AI integration services
+- Develop SaaS templates
+- Create design system library
+
+## 🎯 Goals for Q2
+- [ ] Launch new service offering
+- [ ] Optimize current workflows  
+- [ ] Expand client base by 30%`
+      },
+      'Meeting Notes/': { type: 'folder', items: 3, modified: '1 day ago', icon: '📁' },
+      'Design Assets/': { type: 'folder', items: 15, modified: '3 hours ago', icon: '📁' },
+      'Client Files/': { type: 'folder', items: 8, modified: '1 week ago', icon: '📁' },
+      'Templates/': { type: 'folder', items: 12, modified: '5 days ago', icon: '📁' }
+    },
+    '/Meeting Notes/': {
+      '../': { type: 'back', icon: '⬅️' },
+      'Client Call - Sarah.txt': { 
+        type: 'text', 
+        size: '1.8 KB', 
+        modified: '1 day ago', 
+        icon: '📝',
+        content: `Client Call Notes - Sarah Johnson
+Date: May 13, 2025
+Duration: 45 minutes
+
+Key Discussion Points:
+- Website redesign timeline
+- Budget approval for Phase 2
+- Mobile responsiveness priority
+- Content strategy concerns
+
+Action Items:
+- Send wireframe revisions by Thursday
+- Schedule design review meeting
+- Prepare content outline
+- Update project timeline
+
+Next Meeting: May 20, 2025`
+      },
+      'Team Standup Notes.md': { 
+        type: 'markdown', 
+        size: '1.2 KB', 
+        modified: '2 days ago', 
+        icon: '📄',
+        content: `# Team Standup - Week 20
+
+## Yesterday's Progress
+- Completed wireframes for client project
+- Fixed responsive issues on landing page  
+- Updated project documentation
+
+## Today's Goals
+- Client presentation prep
+- Code review for new features
+- Design system updates
+
+## Blockers
+- Waiting for client feedback on mockups
+- Need approval for new design direction`
+      },
+      'Project Planning Session.txt': { 
+        type: 'text', 
+        size: '2.1 KB', 
+        modified: '5 days ago', 
+        icon: '📝',
+        content: 'Project planning session notes...'
+      }
+    },
+    '/Design Assets/': {
+      '../': { type: 'back', icon: '⬅️' },
+      'Logos/': { type: 'folder', items: 8, modified: '2 days ago', icon: '📁' },
+      'Icons/': { type: 'folder', items: 24, modified: '1 day ago', icon: '📁' },
+      'Brand-Guidelines.pdf': { type: 'pdf', size: '5.2 MB', modified: '1 week ago', icon: '📄' },
+      'Color-Palette.figma': { type: 'design', size: '892 KB', modified: '3 days ago', icon: '🎨' },
+      'Hero-Image.jpg': { 
+        type: 'image', 
+        size: '1.2 MB', 
+        modified: '5 hours ago', 
+        icon: '🖼️',
+        preview: '/api/placeholder/400/300'
+      }
+    },
+    '/Client Files/': {
+      '../': { type: 'back', icon: '⬅️' },
+      'Sarah Johnson/': { type: 'folder', items: 5, modified: '2 days ago', icon: '📁' },
+      'Emma Rodriguez/': { type: 'folder', items: 7, modified: '1 week ago', icon: '📁' },
+      'Michael Chen/': { type: 'folder', items: 3, modified: '3 days ago', icon: '📁' }
+    }
+  };
+
+  // Inject modern file browser styles
   function injectFileBrowserStyles() {
     const styleEl = document.createElement('style');
     styleEl.id = 'house-of-vibes-files';
     styleEl.textContent = `
-      /* House of Vibes - File Browser Styles */
+      /* House of Vibes - Modern File Browser */
       
-      /* Get theme colors from the themes extension */
+      /* File browser button - matches theme system */
       .hov-file-button {
         position: fixed;
         bottom: 30px;
         right: 30px;
         z-index: 9999;
-        background: linear-gradient(135deg, var(--hov-primary, #4ec5d4) 0%, var(--hov-secondary, #72c6ef) 100%);
-        color: white;
-        border: none;
-        padding: 15px 25px;
-        border-radius: 50px;
+        background: var(--hov-surface-color, rgba(255, 255, 255, 0.9));
+        color: var(--hov-primary, #6bb6d6);
+        border: 2px solid var(--hov-primary, #6bb6d6);
+        padding: 12px 20px;
+        border-radius: 25px;
         cursor: move;
-        font-size: 18px;
-        font-weight: bold;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
         user-select: none;
+        backdrop-filter: blur(10px);
       }
       
       .hov-file-button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+        background: var(--hov-primary, #6bb6d6);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
       }
       
-      /* File browser modal */
+      /* Modern file browser modal */
       .hov-file-browser {
         position: fixed;
         top: 0;
@@ -103,20 +165,21 @@
       }
       
       .hov-file-modal {
-        background: white;
+        background: var(--hov-surface-color, white);
         border-radius: 20px;
-        width: 90vw;
-        max-width: 900px;
-        height: 80vh;
-        max-height: 700px;
+        width: 95vw;
+        max-width: 1200px;
+        height: 85vh;
+        max-height: 800px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.1);
       }
       
       .hov-file-header {
-        background: linear-gradient(135deg, var(--hov-primary, #4ec5d4) 0%, var(--hov-secondary, #72c6ef) 100%);
+        background: var(--hov-primary, #6bb6d6);
         padding: 20px;
         color: white;
         display: flex;
@@ -148,57 +211,169 @@
         transform: scale(1.1);
       }
       
+      /* Navigation breadcrumbs */
+      .hov-file-nav {
+        background: #f8fafc;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      
+      .hov-breadcrumb {
+        color: var(--hov-primary, #6bb6d6);
+        text-decoration: none;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+      
+      .hov-breadcrumb:hover {
+        background: rgba(107, 182, 214, 0.1);
+      }
+      
+      .hov-breadcrumb.current {
+        color: var(--hov-text-color, #1f2937);
+        cursor: default;
+      }
+      
+      .hov-breadcrumb-separator {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      /* File content area */
       .hov-file-content {
         padding: 20px;
         flex: 1;
         overflow-y: auto;
+        background: #fafbfc;
       }
       
+      /* File actions toolbar */
+      .hov-file-toolbar {
+        background: white;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      
+      .hov-toolbar-btn {
+        background: var(--hov-surface-color, white);
+        border: 1px solid #d1d5db;
+        color: var(--hov-text-color, #374151);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      
+      .hov-toolbar-btn:hover {
+        background: #f3f4f6;
+        border-color: var(--hov-primary, #6bb6d6);
+      }
+      
+      .hov-toolbar-btn.active {
+        background: var(--hov-primary, #6bb6d6);
+        color: white;
+        border-color: var(--hov-primary, #6bb6d6);
+      }
+      
+      /* File grid */
       .hov-file-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 15px;
+        padding: 5px;
       }
       
+      .hov-file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      /* File cards */
       .hov-file-card {
         background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
         cursor: pointer;
-        border: 2px solid #f0f0f0;
+        border: 1px solid #e5e7eb;
       }
       
       .hov-file-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        border-color: var(--hov-primary, #4ec5d4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-color: var(--hov-primary, #6bb6d6);
+      }
+      
+      .hov-file-list-item {
+        background: white;
+        border-radius: 8px;
+        padding: 12px 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .hov-file-list-item:hover {
+        background: #f9fafb;
+        border-color: var(--hov-primary, #6bb6d6);
       }
       
       .hov-file-icon {
-        font-size: 48px;
+        font-size: 32px;
         text-align: center;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+      }
+      
+      .hov-file-list-icon {
+        font-size: 24px;
+        width: 32px;
+        text-align: center;
       }
       
       .hov-file-name {
-        font-weight: bold;
-        color: #333;
-        font-size: 16px;
-        margin-bottom: 8px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+        font-weight: 600;
+        color: var(--hov-text-color, #1f2937);
+        font-size: 14px;
+        margin-bottom: 5px;
+        word-break: break-word;
+      }
+      
+      .hov-file-list-name {
+        font-weight: 600;
+        color: var(--hov-text-color, #1f2937);
+        flex: 1;
       }
       
       .hov-file-info {
-        color: #666;
-        font-size: 14px;
+        color: #6b7280;
+        font-size: 12px;
         line-height: 1.4;
       }
       
-      /* File preview styles */
+      .hov-file-list-info {
+        color: #6b7280;
+        font-size: 12px;
+        text-align: right;
+      }
+      
+      /* File preview modal */
       .hov-file-preview {
         position: fixed;
         top: 0;
@@ -218,28 +393,112 @@
         border-radius: 15px;
         width: 90%;
         max-width: 800px;
-        height: 70%;
-        padding: 20px;
+        height: 80%;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       }
       
       .hov-preview-header {
+        background: var(--hov-primary, #6bb6d6);
+        padding: 15px 20px;
+        color: white;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
+      }
+      
+      .hov-preview-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
       }
       
       .hov-preview-text {
-        flex: 1;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        font-family: 'Courier New', monospace;
-        padding: 20px 0;
+        font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
         font-size: 14px;
         line-height: 1.6;
+        white-space: pre-wrap;
+        color: var(--hov-text-color, #1f2937);
+      }
+      
+      .hov-preview-markdown {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: var(--hov-text-color, #1f2937);
+      }
+      
+      .hov-preview-markdown h1, 
+      .hov-preview-markdown h2, 
+      .hov-preview-markdown h3 {
+        color: var(--hov-primary, #6bb6d6);
+        margin-top: 24px;
+        margin-bottom: 12px;
+      }
+      
+      .hov-preview-markdown code {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+      }
+      
+      .hov-preview-markdown ul {
+        margin: 12px 0;
+        padding-left: 24px;
+      }
+      
+      .hov-preview-markdown li {
+        margin: 4px 0;
+      }
+      
+      .hov-preview-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+      
+      /* Search functionality */
+      .hov-file-search {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+      }
+      
+      .hov-search-input {
+        width: 100%;
+        padding: 8px 35px 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+      }
+      
+      .hov-search-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 16px;
+      }
+      
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .hov-file-modal {
+          width: 98vw;
+          height: 95vh;
+        }
+        
+        .hov-file-grid {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+        
+        .hov-file-toolbar {
+          flex-wrap: wrap;
+        }
       }
     `;
     
@@ -287,19 +546,48 @@
     });
   }
 
+  // Parse markdown to HTML
+  function parseMarkdown(text) {
+    return text
+      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+      .replace(/^\* (.*$)/gm, '<li>$1</li>')
+      .replace(/^- (.*$)/gm, '<li>$1</li>')
+      .replace(/(\r\n|\r|\n)/g, '<br>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+  }
+
   // Show file preview
-  function showFilePreview(fileName, content) {
+  function showFilePreview(fileName, file) {
     const preview = document.createElement('div');
     preview.className = 'hov-file-preview';
     preview.style.display = 'flex';
     
+    let contentHtml = '';
+    
+    if (file.type === 'markdown') {
+      contentHtml = `<div class="hov-preview-markdown">${parseMarkdown(file.content)}</div>`;
+    } else if (file.type === 'text') {
+      contentHtml = `<div class="hov-preview-text">${file.content}</div>`;
+    } else if (file.type === 'image') {
+      contentHtml = `<img src="${file.preview}" alt="${fileName}" class="hov-preview-image">`;
+    } else {
+      contentHtml = `<div class="hov-preview-text">Preview not available for this file type.</div>`;
+    }
+    
     preview.innerHTML = `
       <div class="hov-preview-content">
         <div class="hov-preview-header">
-          <h3>${fileName}</h3>
+          <h3>${file.icon} ${fileName}</h3>
           <button class="hov-file-close">×</button>
         </div>
-        <div class="hov-preview-text">${content}</div>
+        <div class="hov-preview-body">
+          ${contentHtml}
+        </div>
       </div>
     `;
     
@@ -317,9 +605,152 @@
     };
   }
 
-  // Show folder contents
-  function showFolderContents(folderName) {
-    alert(`📁 Opening ${folderName} folder\n\n📄 logo.svg\n🎨 icons/\n📸 photos/\n🎥 videos/\n\nThis would show the actual folder contents!`);
+  // Navigate to folder
+  function navigateToFolder(folderPath) {
+    if (folderPath === '../') {
+      // Go back
+      folderHistory.pop();
+      currentFolder = folderHistory[folderHistory.length - 1] || '/';
+    } else {
+      folderHistory.push(folderPath);
+      currentFolder = folderPath;
+    }
+    updateFileView();
+  }
+
+  // Navigate to breadcrumb
+  function navigateToBreadcrumb(path) {
+    const index = folderHistory.indexOf(path);
+    if (index !== -1) {
+      folderHistory = folderHistory.slice(0, index + 1);
+      currentFolder = path;
+      updateFileView();
+    }
+  }
+
+  // Search files
+  function searchFiles(query) {
+    if (!query) {
+      updateFileView();
+      return;
+    }
+    
+    const files = fileSystem[currentFolder] || {};
+    const filtered = {};
+    
+    for (const [name, file] of Object.entries(files)) {
+      if (name.toLowerCase().includes(query.toLowerCase())) {
+        filtered[name] = file;
+      }
+    }
+    
+    renderFiles(filtered);
+  }
+
+  // Render files
+  function renderFiles(files) {
+    const content = document.querySelector('.hov-file-content');
+    const isGridView = document.querySelector('.hov-view-grid').classList.contains('active');
+    
+    content.innerHTML = '';
+    
+    if (isGridView) {
+      const grid = document.createElement('div');
+      grid.className = 'hov-file-grid';
+      
+      Object.entries(files).forEach(([name, file]) => {
+        const card = document.createElement('div');
+        card.className = 'hov-file-card';
+        
+        const displayInfo = file.type === 'folder' ? 
+          `${file.items} items` : 
+          `${file.size}`;
+        
+        card.innerHTML = `
+          <div class="hov-file-icon">${file.icon}</div>
+          <div class="hov-file-name">${name}</div>
+          <div class="hov-file-info">${displayInfo}<br>Modified ${file.modified}</div>
+        `;
+        
+        card.onclick = () => handleFileClick(name, file);
+        grid.appendChild(card);
+      });
+      
+      content.appendChild(grid);
+    } else {
+      const list = document.createElement('div');
+      list.className = 'hov-file-list';
+      
+      Object.entries(files).forEach(([name, file]) => {
+        const item = document.createElement('div');
+        item.className = 'hov-file-list-item';
+        
+        const displayInfo = file.type === 'folder' ? 
+          `${file.items} items` : 
+          `${file.size}`;
+        
+        item.innerHTML = `
+          <div class="hov-file-list-icon">${file.icon}</div>
+          <div class="hov-file-list-name">${name}</div>
+          <div class="hov-file-list-info">${displayInfo}<br>${file.modified}</div>
+        `;
+        
+        item.onclick = () => handleFileClick(name, file);
+        list.appendChild(item);
+      });
+      
+      content.appendChild(list);
+    }
+  }
+
+  // Handle file/folder click
+  function handleFileClick(name, file) {
+    if (file.type === 'folder') {
+      const folderPath = currentFolder === '/' ? `/${name}/` : `${currentFolder}${name}/`;
+      navigateToFolder(folderPath);
+    } else if (file.type === 'back') {
+      navigateToFolder('../');
+    } else {
+      showFilePreview(name, file);
+    }
+  }
+
+  // Update file view
+  function updateFileView() {
+    const files = fileSystem[currentFolder] || {};
+    renderFiles(files);
+    updateBreadcrumbs();
+  }
+
+  // Update breadcrumbs
+  function updateBreadcrumbs() {
+    const nav = document.querySelector('.hov-file-nav');
+    if (!nav) return;
+    
+    let breadcrumbsHtml = '';
+    
+    folderHistory.forEach((path, index) => {
+      const isLast = index === folderHistory.length - 1;
+      const name = path === '/' ? 'Home' : path.split('/').filter(Boolean).pop();
+      
+      if (isLast) {
+        breadcrumbsHtml += `<span class="hov-breadcrumb current">${name}</span>`;
+      } else {
+        breadcrumbsHtml += `<a class="hov-breadcrumb" onclick="navigateToBreadcrumb('${path}')">${name}</a>`;
+        breadcrumbsHtml += `<span class="hov-breadcrumb-separator">›</span>`;
+      }
+    });
+    
+    nav.innerHTML = breadcrumbsHtml;
+  }
+
+  // Toggle view
+  function toggleView(viewType) {
+    document.querySelectorAll('.hov-toolbar-btn[data-view]').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector(`[data-view="${viewType}"]`).classList.add('active');
+    updateFileView();
   }
 
   // Create file browser button
@@ -333,6 +764,9 @@
       const browser = document.querySelector('.hov-file-browser');
       if (browser) {
         browser.style.display = browser.style.display === 'none' ? 'flex' : 'none';
+        if (browser.style.display === 'flex') {
+          updateFileView();
+        }
       }
     };
     
@@ -350,44 +784,48 @@
     const modal = document.createElement('div');
     modal.className = 'hov-file-modal';
     
-    const header = document.createElement('div');
-    header.className = 'hov-file-header';
-    header.innerHTML = `
-      <div class="hov-file-title">📁 File Explorer</div>
-      <button class="hov-file-close">×</button>
+    modal.innerHTML = `
+      <div class="hov-file-header">
+        <div class="hov-file-title">📁 File Explorer</div>
+        <button class="hov-file-close">×</button>
+      </div>
+      
+      <div class="hov-file-nav"></div>
+      
+      <div class="hov-file-toolbar">
+        <button class="hov-toolbar-btn hov-view-grid active" data-view="grid" onclick="toggleView('grid')">
+          ◻️ Grid
+        </button>
+        <button class="hov-toolbar-btn hov-view-list" data-view="list" onclick="toggleView('list')">
+          ☰ List
+        </button>
+        <div class="hov-file-search">
+          <input type="text" class="hov-search-input" placeholder="Search files...">
+          <span class="hov-search-icon">🔍</span>
+        </div>
+      </div>
+      
+      <div class="hov-file-content"></div>
     `;
     
-    const content = document.createElement('div');
-    content.className = 'hov-file-content';
-    
-    const grid = document.createElement('div');
-    grid.className = 'hov-file-grid';
-    
-    // Add files
-    mockFiles.forEach(file => {
-      const card = document.createElement('div');
-      card.className = 'hov-file-card';
-      card.innerHTML = `
-        <div class="hov-file-icon">${file.icon}</div>
-        <div class="hov-file-name">${file.name}</div>
-        <div class="hov-file-info">${file.type === 'folder' ? `${file.items} items` : file.size}<br>Modified ${file.modified}</div>
-      `;
-      
-      card.onclick = () => file.action();
-      grid.appendChild(card);
-    });
-    
-    content.appendChild(grid);
-    modal.appendChild(header);
-    modal.appendChild(content);
     browser.appendChild(modal);
     document.body.appendChild(browser);
     
     // Make modal draggable by header
-    makeDraggable(modal, header);
+    makeDraggable(modal, modal.querySelector('.hov-file-header'));
+    
+    // Search functionality
+    const searchInput = modal.querySelector('.hov-search-input');
+    searchInput.addEventListener('input', (e) => {
+      searchFiles(e.target.value);
+    });
+    
+    // Make functions globally available
+    window.navigateToBreadcrumb = navigateToBreadcrumb;
+    window.toggleView = toggleView;
     
     // Close browser
-    header.querySelector('.hov-file-close').onclick = () => {
+    modal.querySelector('.hov-file-close').onclick = () => {
       browser.style.display = 'none';
     };
     
