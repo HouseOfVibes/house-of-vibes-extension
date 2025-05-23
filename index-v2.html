@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Vibes Extension v2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3b9ddb 0%, #64c4ff 50%, #e0f7ff 100%);
+            color: #1f2937;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #3b9ddb 0%, #38c172 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .version {
+            font-size: 1.2em;
+            color: #4b5563;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        
+        .description {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #4b5563;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .features h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #4b5563;
+        }
+        
+        .feature-list li:before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+        
+        .url-section {
+            background: #f3f4f6;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+        
+        .url-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        
+        code {
+            display: block;
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            word-break: break-all;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        code:hover {
+            background: #374151;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .copy-hint {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .theme-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .theme-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .theme-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .theme-name {
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .info {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .theme-preview {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="info">
+            <h1>🏠 House of Vibes Extension</h1>
+            <p class="version">Version 2.0 - Contemporary Digital 2025</p>
+            <p class="description">
+                Transform your TypingMind experience with beautiful, modern themes. 
+                Featuring vibrant colors, themed sidebars, and perfect text contrast for any lighting condition.
+            </p>
+            
+            <div class="features">
+                <h2>What's New in v2.0</h2>
+                <ul class="feature-list">
+                    <li>10 stunning themes with vibrant, balanced colors</li>
+                    <li>Themed sidebars that match your selected theme</li>
+                    <li>Perfect text contrast for all backgrounds</li>
+                    <li>Compact, draggable theme selector (40px)</li>
+                    <li>4 new dark themes for night browsing</li>
+                    <li>Modern 2025 digital aesthetic</li>
+                </ul>
+            </div>
+            
+            <div class="theme-preview">
+                <div class="theme-card">
+                    <div class="theme-color" style="background: #3b9ddb"></div>
+                    <div class="theme-name">🌊 Ocean</div>
+                </div>
+                <div class="theme-card">
+                    <div class="theme-color" style="background: #ff6b5b"></div>
+                    <div class="theme-name">🌅 Sunset</div>
+                </div>
+                <div class="theme-card">
+                    <div class="theme-color" style="background: #38c172"></div>
+                    <div class="theme-name">🌿 Spring</div>
+                </div>
+                <div class="theme-card">
+                    <div class="theme-color" style="background: #7209b7"></div>
+                    <div class="theme-name">💻 Cyber</div>
+                </div>
+                <div class="theme-card">
+                    <div class="theme-color" style="background: #1a1a2e"></div>
+                    <div class="theme-name">🌃 Night</div>
+                </div>
+                <div class="theme-card">
+                    <div class="theme-color" style="background: linear-gradient(135deg, #240046 0%, #3c096c 100%)"></div>
+                    <div class="theme-name">🏙️ Neo Tokyo</div>
+                </div>
+            </div>
+            
+            <div class="url-section">
+                <p class="url-label">📌 Extension URL:</p>
+                <code onclick="copyToClipboard(this)">https://houseofvibes.github.io/house-of-vibes-extension/index.js</code>
+                <p class="copy-hint">Click to copy • Add this URL to TypingMind → Settings → Extensions</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copyToClipboard(element) {
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = element.textContent;
+                element.textContent = '✅ Copied!';
+                element.style.background = '#38c172';
+                
+                setTimeout(() => {
+                    element.textContent = originalText;
+                    element.style.background = '#1f2937';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+        
+        // Add hover effect to theme cards
+        document.querySelectorAll('.theme-card').forEach(card => {
+            const colorDiv = card.querySelector('.theme-color');
+            const bgColor = colorDiv.style.background;
+            
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = bgColor.includes('gradient') ? '#7209b7' : bgColor;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'transparent';
+            });
+        });
+    </script>
+</body>
+</html>
