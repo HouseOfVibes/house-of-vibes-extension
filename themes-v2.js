@@ -1,10 +1,10 @@
 // House of Vibes - Themes Extension
-// Version 2.0 - Contemporary Digital 2025 Edition with Proper Text Contrast
+// Version 2.0 - Contemporary Digital 2025 Edition
 
 (function() {
   console.log('🎨 House of Vibes Themes v2.0 loading...');
   
-  // Modern 2025 color palette with proper text contrast
+  // Modern 2025 color palette - more vibrant yet balanced
   const themes = {
     sunset: {
       name: "🌅 Sunset",
@@ -14,8 +14,6 @@
       sidebarColor: "#fff5f5",
       accentColor: "#ff3d7f",
       textColor: "#1f2937",
-      textSecondary: "#4b5563",
-      sidebarText: "#1f2937",
       isDark: false
     },
     ocean: {
@@ -26,8 +24,6 @@
       sidebarColor: "#f0fcff",
       accentColor: "#0077c2",
       textColor: "#1f2937",
-      textSecondary: "#4b5563",
-      sidebarText: "#1f2937",
       isDark: false
     },
     spring: {
@@ -38,8 +34,6 @@
       sidebarColor: "#f5fff7",
       accentColor: "#0da678",
       textColor: "#1f2937",
-      textSecondary: "#4b5563",
-      sidebarText: "#1f2937",
       isDark: false
     },
     cyber: {
@@ -50,8 +44,6 @@
       sidebarColor: "#f8f2ff",
       accentColor: "#4cc9f0",
       textColor: "#1f2937",
-      textSecondary: "#4b5563",
-      sidebarText: "#1f2937",
       isDark: false
     },
     retro: {
@@ -62,8 +54,6 @@
       sidebarColor: "#fff9e6",
       accentColor: "#ff0066",
       textColor: "#1f2937",
-      textSecondary: "#4b5563",
-      sidebarText: "#1f2937",
       isDark: false
     },
     minimal: {
@@ -74,8 +64,6 @@
       sidebarColor: "#ffffff",
       accentColor: "#5e5e5e",
       textColor: "#1f2937",
-      textSecondary: "#4b5563",
-      sidebarText: "#1f2937",
       isDark: false
     },
     nightmode: {
@@ -86,8 +74,6 @@
       sidebarColor: "#16213e",
       accentColor: "#4f46e5",
       textColor: "#f3f4f6",
-      textSecondary: "#d1d5db",
-      sidebarText: "#e5e7eb",
       isDark: true
     },
     neotokyo: {
@@ -98,8 +84,6 @@
       sidebarColor: "#240046",
       accentColor: "#00f5d4",
       textColor: "#f9fafb",
-      textSecondary: "#e5e7eb",
-      sidebarText: "#f3f4f6",
       isDark: true
     },
     forest: {
@@ -110,8 +94,6 @@
       sidebarColor: "#1a2e21",
       accentColor: "#a3e635",
       textColor: "#f3f4f6",
-      textSecondary: "#d1d5db",
-      sidebarText: "#e5e7eb",
       isDark: true
     },
     horizon: {
@@ -122,15 +104,13 @@
       sidebarColor: "#042f4b",
       accentColor: "#fef08a",
       textColor: "#f3f4f6",
-      textSecondary: "#d1d5db",
-      sidebarText: "#e5e7eb",
       isDark: true
     }
   };
 
   let currentTheme = 'ocean';
 
-  // Inject refined 2025 theme styles with proper text contrast
+  // Inject refined 2025 theme styles
   function injectThemeStyles() {
     const styleEl = document.createElement('style');
     styleEl.id = 'house-of-vibes-themes';
@@ -146,34 +126,26 @@
         --hov-accent: #0077c2;
         --hov-text: #1f2937;
         --hov-text-secondary: #4b5563;
-        --hov-sidebar-text: #1f2937;
         --hov-border: rgba(0, 0, 0, 0.1);
         --hov-hover-bg: rgba(0, 0, 0, 0.03);
-        --hov-button-bg: rgba(255, 255, 255, 0.9);
-        --hov-message-bg: rgba(255, 255, 255, 0.85);
       }
       
       /* Dark theme variable overrides */
       .theme-dark {
+        --hov-text: #f3f4f6;
+        --hov-text-secondary: #d1d5db;
         --hov-border: rgba(255, 255, 255, 0.1);
         --hov-hover-bg: rgba(255, 255, 255, 0.05);
-        --hov-button-bg: rgba(30, 41, 59, 0.9);
-        --hov-message-bg: rgba(30, 41, 59, 0.85);
       }
       
-      /* Clean background with proper text color */
+      /* Clean background */
       body {
         background: var(--hov-background) !important;
         color: var(--hov-text) !important;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
       
-      /* Ensure all text is readable */
-      body * {
-        color: var(--hov-text) !important;
-      }
-      
-      /* Modern 2025 sidebar with theme-matching and readable text */
+      /* Modern 2025 sidebar with theme-matching */
       aside,
       nav,
       .sidebar,
@@ -185,13 +157,13 @@
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.03) !important;
       }
       
-      /* Sidebar text contrast */
+      /* Sidebar text with proper contrast */
       aside *,
       nav *,
       .sidebar *,
       [class*="w-64"] *,
       [class*="w-60"] * {
-        color: var(--hov-sidebar-text) !important;
+        color: var(--hov-text) !important;
       }
       
       /* Sidebar headers with accent color */
@@ -212,7 +184,7 @@
         border: 1px solid var(--hov-border) !important;
         border-radius: 8px !important;
         transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-        color: var(--hov-sidebar-text) !important;
+        color: var(--hov-text) !important;
         position: relative;
         overflow: hidden;
       }
@@ -228,9 +200,9 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
       }
       
-      /* Modern text fields with readable text */
+      /* Modern text fields */
       input, textarea {
-        background: var(--hov-button-bg) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         color: var(--hov-text) !important;
         border: 1px solid var(--hov-border) !important;
         border-radius: 8px !important;
@@ -238,10 +210,9 @@
         transition: all 0.2s ease !important;
       }
       
-      input::placeholder,
-      textarea::placeholder {
-        color: var(--hov-text-secondary) !important;
-        opacity: 0.7 !important;
+      .theme-dark input,
+      .theme-dark textarea {
+        background: rgba(30, 41, 59, 0.9) !important;
       }
       
       input:focus, textarea:focus {
@@ -250,12 +221,12 @@
         box-shadow: 0 0 0 3px rgba(59, 157, 219, 0.2) !important;
       }
       
-      /* Message bubbles with readable text */
+      /* Message bubbles with subtle accents */
       .chat-message, 
       .message, 
       [class*="message-container"],
       [class*="chat-bubble"] {
-        background: var(--hov-message-bg) !important;
+        background: rgba(255, 255, 255, 0.85) !important;
         border-radius: 12px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
         border: 1px solid var(--hov-border) !important;
@@ -264,19 +235,11 @@
         position: relative !important;
       }
       
-      /* Ensure message text is readable */
-      .chat-message *, 
-      .message *, 
-      [class*="message-container"] *,
-      [class*="chat-bubble"] * {
-        color: var(--hov-text) !important;
-      }
-      
-      /* Code blocks with proper contrast */
-      pre, code {
-        background: var(--hov-hover-bg) !important;
-        color: var(--hov-text) !important;
-        border: 1px solid var(--hov-border) !important;
+      .theme-dark .chat-message,
+      .theme-dark .message,
+      .theme-dark [class*="message-container"],
+      .theme-dark [class*="chat-bubble"] {
+        background: rgba(30, 41, 59, 0.85) !important;
       }
       
       /* User messages with primary color accent */
@@ -322,7 +285,7 @@
         width: 40px !important;
         height: 40px !important;
         border-radius: 20px !important;
-        background: var(--hov-button-bg) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(10px) !important;
         border: 1px solid var(--hov-border) !important;
         color: var(--hov-primary) !important;
@@ -332,6 +295,10 @@
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
         padding: 0 !important;
         outline: none !important;
+      }
+      
+      .theme-dark .hov-theme-btn {
+        background: rgba(30, 41, 59, 0.9) !important;
       }
       
       .hov-theme-btn:hover {
@@ -349,12 +316,12 @@
         color: var(--hov-text);
       }
       
-      /* Sleek dropdown with readable text */
+      /* Sleek dropdown */
       .hov-theme-dropdown {
         position: absolute;
         top: 100%;
         right: 0;
-        background: var(--hov-button-bg);
+        background: rgba(255, 255, 255, 0.98);
         border-radius: 12px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         display: none;
@@ -362,8 +329,13 @@
         margin-top: 10px;
         overflow: hidden;
         backdrop-filter: blur(20px);
-        border: 1px solid var(--hov-border);
+        border: 1px solid rgba(0, 0, 0, 0.06);
         padding: 8px;
+      }
+      
+      .theme-dark .hov-theme-dropdown {
+        background: rgba(30, 41, 59, 0.98);
+        border-color: rgba(255, 255, 255, 0.06);
       }
       
       .hov-theme-option {
@@ -389,27 +361,7 @@
         height: 16px;
         border-radius: 4px;
         margin-right: 10px;
-        border: 1px solid var(--hov-border);
-      }
-      
-      /* Links with theme colors */
-      a {
-        color: var(--hov-primary) !important;
-      }
-      
-      a:hover {
-        color: var(--hov-secondary) !important;
-      }
-      
-      /* Selection colors */
-      ::selection {
-        background: var(--hov-primary) !important;
-        color: white !important;
-      }
-      
-      ::-moz-selection {
-        background: var(--hov-primary) !important;
-        color: white !important;
+        border: 1px solid rgba(0, 0, 0, 0.1);
       }
     `;
     
@@ -420,7 +372,7 @@
     document.head.appendChild(styleEl);
   }
 
-  // Apply specific theme with proper text colors
+  // Apply specific theme with refined colors
   function applyTheme(themeName) {
     const theme = themes[themeName];
     if (!theme) return;
@@ -432,8 +384,7 @@
     document.documentElement.style.setProperty('--hov-sidebar', theme.sidebarColor);
     document.documentElement.style.setProperty('--hov-accent', theme.accentColor);
     document.documentElement.style.setProperty('--hov-text', theme.textColor);
-    document.documentElement.style.setProperty('--hov-text-secondary', theme.textSecondary);
-    document.documentElement.style.setProperty('--hov-sidebar-text', theme.sidebarText);
+    document.documentElement.style.setProperty('--hov-text-secondary', theme.isDark ? '#d1d5db' : '#4b5563');
     
     // Apply background immediately
     document.body.style.background = theme.background;
